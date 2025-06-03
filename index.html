@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HACKER TERMINAL</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: #00ff00;
+      font-family: 'Courier New', Courier, monospace;
+      padding: 20px;
+      overflow: hidden;
+    }
+    #terminal {
+      white-space: pre-wrap;
+      line-height: 1.5;
+      font-size: 16px;
+    }
+    .blinking-cursor {
+      display: inline-block;
+      width: 10px;
+      height: 1em;
+      background-color: #00ff00;
+      animation: blink 1s infinite;
+      vertical-align: bottom;
+    }
+    @keyframes blink {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div id="terminal"></div><div class="blinking-cursor"></div>
+
+  <audio id="typeSound" src="https://cdn.pixabay.com/download/audio/2022/03/26/audio_0f96ff1942.mp3?filename=typewriter-1-18510.mp3"></audio>
+
+  <script>
+    const terminal = document.getElementById('terminal');
+    const typeSound = document.getElementById('typeSound');
+    const lines = [
+      "Accessing mainframe...",
+      "Bypassing firewall...",
+      "Decrypting security...",
+      "Downloading confidential files...",
+      "Uploading virus.exe...",
+      "Hacking the Pentagon...",
+      "Success! System compromised.",
+      "█▓▒░ SELF-DESTRUCT IN 3... ░▒▓█",
+      "█▓▒░ SELF-DESTRUCT IN 2... ░▒▓█",
+      "█▓▒░ SELF-DESTRUCT IN 1... ░▒▓█",
+      "Just kidding. 😉"
+    ];
+
+    let lineIndex = 0;
+    let charIndex = 0;
+    let typing = true;
+
+    function typeLine() {
+      if (lineIndex < lines.length) {
+        const currentLine = lines[lineIndex];
+        if (charIndex < currentLine.length) {
+          terminal.textContent += currentLine[charIndex];
+          playSound();
+          charIndex++;
+          setTimeout(typeLine, 50);
+        } else {
+          terminal.textContent += '\n';
+          charIndex = 0;
+          lineIndex++;
+          setTimeout(typeLine, 500);
+        }
+      } else {
+        typing = false;
+        setTimeout(() => {
+          alert("💀 YOU’VE BEEN HACKED 💀");
+        }, 1000);
+      }
+    }
+
+    function playSound() {
+      typeSound.currentTime = 0;
+      typeSound.play();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!typing) {
+        const fakeInput = `[user@hacked ~]$ ${e.key}\n`;
+        terminal.textContent += fakeInput;
+        playSound();
+      }
+    });
+
+    typeLine();
+  </script>
+</body>
+</html>
