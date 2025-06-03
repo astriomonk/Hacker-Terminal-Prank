@@ -44,6 +44,7 @@
     white-space: pre-wrap;
     outline: none;
     z-index: 2;
+    display: none; /* hidden behind lock screen initially */
   }
   .glitch {
     animation: glitch 0.2s infinite alternate;
@@ -60,100 +61,190 @@
         2px 0 cyan;
     }
   }
+  #profile {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 240px;
+    background: rgba(0, 30, 0, 0.85);
+    border: 1px solid #00ff00;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.4em;
+    z-index: 2;
+    user-select: none;
+    font-weight: 500;
+    color: #00ff00;
+    display: none; /* hidden behind lock screen initially */
+  }
+  #profile h2 {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    font-size: 16px;
+    border-bottom: 1px solid #00ff00;
+    padding-bottom: 6px;
+  }
+  #profile ul {
+    padding-left: 18px;
+    margin: 6px 0 0 0;
+  }
+
+  /* Lock screen styles */
   #lock-screen {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
     background: #000;
+    z-index: 5;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 10;
+    color: #00ff00;
+    user-select: none;
   }
-  #lock-screen input {
-    background: transparent;
+  #lock-screen h1 {
+    margin: 0 0 20px 0;
+    font-size: 36px;
+    letter-spacing: 4px;
+    text-align: center;
+  }
+  #passcode-input {
+    background: black;
     border: 2px solid #00ff00;
     color: #00ff00;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 22px;
-    padding: 10px 20px;
+    font-size: 28px;
     width: 180px;
     text-align: center;
+    padding: 10px;
+    border-radius: 8px;
     outline: none;
   }
-  #lock-screen input::placeholder {
-    color: #00ff00aa;
+  #passcode-input::placeholder {
+    color: #005500;
   }
-  /* Glowing digital lock shape using CSS */
-  #digital-lock {
-    width: 130px;
-    height: 130px;
-    margin-bottom: 30px;
-    border: 6px solid #00ff00;
-    border-radius: 25% 25% 40% 40% / 50% 50% 40% 40%;
+  #error-msg {
+    margin-top: 10px;
+    color: #ff3300;
+    height: 18px;
+    font-size: 14px;
+    font-weight: bold;
+    visibility: hidden;
+  }
+
+  /* Glowing digital lock shape */
+  .lock-icon {
+    width: 120px;
+    height: 160px;
     position: relative;
+    margin-bottom: 40px;
+  }
+  .lock-body {
+    position: absolute;
+    bottom: 0;
+    width: 100px;
+    height: 100px;
+    background: #00ff00;
+    border-radius: 20px 20px 15px 15px;
     box-shadow:
       0 0 15px #00ff00,
-      inset 0 0 15px #00ff00,
-      0 0 30px #00ff00aa;
+      0 0 30px #00ff00,
+      0 0 60px #00ff00,
+      inset 0 0 15px #008800;
+    left: 50%;
+    transform: translateX(-50%);
   }
-  #digital-lock::before {
-    content: "";
+  .lock-shackle {
     position: absolute;
-    top: 15px; left: 38px;
-    width: 55px; height: 60px;
-    border: 6px solid #00ff00;
-    border-radius: 10px;
+    top: 0;
+    left: 50%;
+    width: 70px;
+    height: 80px;
+    border: 8px solid #00ff00;
+    border-bottom: none;
+    border-radius: 40px 40px 0 0;
     box-shadow:
-      0 0 10px #00ff00,
-      inset 0 0 10px #00ff00;
+      0 0 15px #00ff00,
+      0 0 30px #00ff00,
+      0 0 60px #00ff00,
+      inset 0 0 15px #008800;
+    transform: translateX(-50%);
     background: transparent;
   }
-  #digital-lock::after {
-    content: "";
+  .lock-keyhole {
     position: absolute;
-    bottom: 20px; left: 47px;
-    width: 35px; height: 25px;
-    border: 6px solid #00ff00;
-    border-top: none;
-    border-radius: 0 0 10px 10px;
+    bottom: 30px;
+    left: 50%;
+    width: 20px;
+    height: 40px;
+    background: black;
+    border-radius: 8px 8px 10px 10px;
     box-shadow:
-      0 0 10px #00ff00,
-      inset 0 0 10px #00ff00;
-    background: transparent;
+      0 0 12px #00ff00 inset;
+    transform: translateX(-50%);
   }
-  /* Hidden class to hide lock screen */
-  .hidden {
-    display: none !important;
+  .lock-keyhole::before {
+    content: '';
+    position: absolute;
+    top: 6px;
+    left: 50%;
+    width: 8px;
+    height: 8px;
+    background: #00ff00;
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow:
+      0 0 10px #00ff00;
   }
+
+  /* Hide scrollbar on terminal */
+  #terminal::-webkit-scrollbar {
+    display: none;
+  }
+  #terminal {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
 </style>
 </head>
 <body>
 
-<!-- Binary Background Canvas -->
 <canvas id="binary-bg"></canvas>
-
-<!-- Color cycling overlay -->
 <div id="color-cycle"></div>
 
-<!-- Terminal text area -->
-<div id="terminal" tabindex="0" spellcheck="false"></div>
+<!-- Lock Screen -->
+<div id="lock-screen" role="dialog" aria-modal="true" aria-labelledby="lock-title">
+  <div class="lock-icon" aria-hidden="true">
+    <div class="lock-shackle"></div>
+    <div class="lock-body"></div>
+    <div class="lock-keyhole"></div>
+  </div>
+  <h1 id="lock-title">ENTER PASSCODE</h1>
+  <input type="password" id="passcode-input" placeholder="****" maxlength="4" aria-label="Enter passcode" autocomplete="off" />
+  <div id="error-msg" role="alert">Incorrect passcode!</div>
+</div>
 
-<!-- Lock Screen with passcode input -->
-<div id="lock-screen">
-  <div id="digital-lock" title="Secure Lock"></div>
-  <input
-    id="pass-input"
-    type="password"
-    placeholder="Enter Passcode"
-    autocomplete="off"
-    maxlength="10"
-    autofocus
-  />
+<!-- Terminal -->
+<div id="terminal" tabindex="0" spellcheck="false" aria-live="polite" aria-atomic="false"></div>
+
+<!-- Hacker Profile -->
+<div id="profile" title="Hacker Profile" aria-label="Hacker Profile">
+  <h2>Hacker Profile</h2>
+  <div><strong>Name:</strong> ZeroCool</div>
+  <div><strong>Reputation:</strong> 98.7%</div>
+  <div><strong>Access Level:</strong> Root</div>
+  <div><strong>Achievements:</strong></div>
+  <ul>
+    <li>Master Coder</li>
+    <li>Network Phantom</li>
+    <li>Bug Squasher</li>
+    <li>Crypto Ninja</li>
+  </ul>
 </div>
 
 <script>
-  // Binary background
+  // Binary background setup
   const canvas = document.getElementById('binary-bg');
   const ctx = canvas.getContext('2d');
   let width, height;
@@ -213,8 +304,8 @@
   let typingIndex = 0;
   let charIndex = 0;
   let isDeleting = false;
-  let typingDelay = 140;
-  let pauseDelay = 1800;
+  let typingDelay = 140;  // slowed down typing speed
+  let pauseDelay = 1800;  // longer pause between lines
   let typingTimer;
   let terminalContent = '';
 
@@ -248,47 +339,30 @@
     }
   }
 
-  // Start typing only after unlock
-  let unlocked = false;
-  function startTerminal() {
-    if (!unlocked) {
-      unlocked = true;
-      terminal.textContent = '';
-      terminalContent = '';
-      typingIndex = 0;
-      charIndex = 0;
-      isDeleting = false;
-      typeCommand();
-      terminal.focus();
-    }
-  }
+  // Lock screen logic
+  const lockScreen = document.getElementById('lock-screen');
+  const passcodeInput = document.getElementById('passcode-input');
+  const errorMsg = document.getElementById('error-msg');
+  const profile = document.getElementById('profile');
 
-  // Lock screen and passcode handling
-  const lockScreen = document.getElementById("lock-screen");
-  const passInput = document.getElementById("pass-input");
+  passcodeInput.focus();
 
-  passInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      if (passInput.value === "1234") {
-        lockScreen.classList.add("hidden");
-        startTerminal();
+  passcodeInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      if (passcodeInput.value === '1234') {
+        // Unlock
+        lockScreen.style.display = 'none';
+        terminal.style.display = 'block';
+        profile.style.display = 'block';
+        terminal.focus();
+        errorMsg.style.visibility = 'hidden';
+        typeCommand();
       } else {
-        passInput.value = "";
-        passInput.placeholder = "Wrong Code";
+        errorMsg.style.visibility = 'visible';
+        passcodeInput.value = '';
       }
     }
   });
-
-  // Color cycling handled by CSS animation on #color-cycle
-
-  // Glitch effect on terminal
-  function glitchEffect() {
-    if (Math.random() < 0.15 && unlocked) {
-      terminal.classList.add('glitch');
-      setTimeout(() => terminal.classList.remove('glitch'), 200);
-    }
-  }
-  setInterval(glitchEffect, 3000);
 </script>
 
 </body>
