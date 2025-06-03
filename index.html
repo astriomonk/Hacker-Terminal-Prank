@@ -1,85 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Hacker Terminal</title>
-  <style>
-    html, body {
-      margin: 0; padding: 0;
-      height: 100%;
-      background: black;
-      overflow: hidden;
-      font-family: 'Courier New', Courier, monospace;
-      color: #00ff00;
-    }
-    canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
-    #terminal {
-      position: relative;
-      z-index: 1;
-      padding: 20px;
-      white-space: pre-wrap;
-      line-height: 1.5;
-      font-size: 16px;
-      height: 100vh;
-      overflow-y: auto;
-      box-sizing: border-box;
-      user-select: none;
-    }
-    .blinking-cursor {
-      display: inline-block;
-      width: 10px;
-      height: 1em;
-      background-color: #00ff00;
-      animation: blink 1s infinite;
-      vertical-align: bottom;
-      margin-left: 2px;
-    }
-    @keyframes blink {
-      0%, 50%, 100% {opacity: 1;}
-      25%, 75% {opacity: 0;}
-    }
-    #fullscreen-msg {
-      position: fixed;
-      bottom: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,255,0,0.15);
-      color: #0f0;
-      padding: 5px 15px;
-      font-family: monospace;
-      font-size: 14px;
-      border-radius: 5px;
-      user-select: none;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      z-index: 10;
-    }
-    #fullscreen-msg.show {
-      opacity: 1;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Hacker Terminal Plus</title>
+<style>
+  html, body {
+    margin: 0; padding: 0;
+    height: 100%;
+    background: black;
+    overflow: hidden;
+    font-family: 'Courier New', Courier, monospace;
+    color: #00ff00;
+  }
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+  }
+  #terminal {
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+    font-size: 16px;
+    height: 70vh;
+    overflow-y: auto;
+    box-sizing: border-box;
+    user-select: none;
+  }
+  #inputLine {
+    font-size: 16px;
+    color: #0f0;
+    outline: none;
+    border: none;
+    background: transparent;
+    width: 100%;
+    font-family: monospace;
+  }
+  #inputContainer {
+    position: relative;
+    z-index: 1;
+    padding: 0 20px 20px 20px;
+    background: black;
+  }
+  .blinking-cursor {
+    display: inline-block;
+    width: 10px;
+    height: 1em;
+    background-color: #00ff00;
+    animation: blink 1s infinite;
+    vertical-align: bottom;
+    margin-left: 2px;
+  }
+  @keyframes blink {
+    0%, 50%, 100% {opacity: 1;}
+    25%, 75% {opacity: 0;}
+  }
+  #fullscreen-msg {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,255,0,0.15);
+    color: #0f0;
+    padding: 5px 15px;
+    font-family: monospace;
+    font-size: 14px;
+    border-radius: 5px;
+    user-select: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 10;
+  }
+  #fullscreen-msg.show {
+    opacity: 1;
+  }
+  #statsPanel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 255, 0, 0.15);
+    padding: 10px 15px;
+    font-family: monospace;
+    font-size: 14px;
+    border-radius: 5px;
+    color: #0f0;
+    z-index: 10;
+    user-select: none;
+    width: 160px;
+  }
+  #errorMessage {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: black;
+    border: 3px solid #ff0000;
+    color: #ff0000;
+    font-family: monospace;
+    font-size: 48px;
+    padding: 20px 40px;
+    z-index: 15;
+    display: none;
+    user-select: none;
+    text-align: center;
+  }
+  #asciiArt {
+    position: relative;
+    white-space: pre;
+    font-family: monospace;
+    font-size: 12px;
+    color: #0f0;
+    margin-top: 20px;
+    user-select: none;
+    max-height: 200px;
+    overflow: hidden;
+  }
+</style>
 </head>
 <body>
 
-  <canvas id="matrix"></canvas>
-  <div id="terminal"></div><div class="blinking-cursor"></div>
-  <div id="fullscreen-msg">🔍 Fullscreen mode activated. Press ESC to exit.</div>
+<canvas id="matrix"></canvas>
+<div id="terminal"></div>
+<div id="asciiArt"></div>
+<div id="inputContainer">
+  <input id="inputLine" autocomplete="off" spellcheck="false" placeholder="Type a command..." />
+  <span class="blinking-cursor"></span>
+</div>
+<div id="fullscreen-msg">🔍 Fullscreen mode activated. Press ESC to exit.</div>
+<div id="statsPanel"></div>
+<div id="errorMessage"></div>
 
-  <audio id="typeSound" src="https://cdn.pixabay.com/download/audio/2022/03/26/audio_0f96ff1942.mp3?filename=typewriter-1-18510.mp3" preload="auto"></audio>
+<audio id="typeSound" src="https://cdn.pixabay.com/download/audio/2022/03/26/audio_0f96ff1942.mp3?filename=typewriter-1-18510.mp3" preload="auto"></audio>
+<audio id="scanSound" src="https://cdn.pixabay.com/download/audio/2022/04/26/audio_111bdc6d6d.mp3?filename=scanner-5209.mp3" preload="auto"></audio>
 
 <script>
   const terminal = document.getElementById('terminal');
-  const cursor = document.querySelector('.blinking-cursor');
-  const typeSound = document.getElementById('typeSound');
+  const asciiArt = document.getElementById('asciiArt');
+  const inputLine = document.getElementById('inputLine');
   const fullscreenMsg = document.getElementById('fullscreen-msg');
+  const statsPanel = document.getElementById('statsPanel');
+  const errorMessage = document.getElementById('errorMessage');
+  const typeSound = document.getElementById('typeSound');
+  const scanSound = document.getElementById('scanSound');
 
-  // Fake hacker lines (about 2+ minutes typing)
+  // Fake hacker lines (long list)
   const lines = [
     "Initializing cyberlink protocol...",
     "Loading kernel modules...",
@@ -115,7 +183,6 @@
     "Just kidding. 😉",
     "You survived the simulation.",
     "But did you really?",
-    // Repeat to extend typing time
     "Reinitializing connection...",
     "Bypassing firewalls...",
     "Encrypting packets...",
@@ -144,6 +211,7 @@
     "Logging out..."
   ];
 
+  // Typing effect variables
   let lineIndex = 0;
   let charIndex = 0;
 
@@ -216,17 +284,128 @@
         else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
         else if (el.msRequestFullscreen) el.msRequestFullscreen();
 
-        // Show message
         fullscreenMsg.classList.add('show');
         setTimeout(() => fullscreenMsg.classList.remove('show'), 3000);
       }
     }
   });
 
-  // Start matrix and typing on load
+  // Error messages flashing randomly
+  const errorMessages = [
+    "ERROR 404",
+    "ACCESS DENIED",
+    "INTRUSION DETECTED",
+    "FATAL SYSTEM ERROR",
+    "SEGMENTATION FAULT",
+  ];
+
+  function flashError() {
+    if (Math.random() < 0.1) { // 10% chance every 5 seconds
+      const msg = errorMessages[Math.floor(Math.random() * errorMessages.length)];
+      errorMessage.textContent = msg;
+      errorMessage.style.display = 'block';
+      setTimeout(() => {
+        errorMessage.style.display = 'none';
+      }, 2000);
+    }
+  }
+  setInterval(flashError, 5000);
+
+  // Fake system stats for top right panel
+  let startTime = Date.now();
+
+  function updateStats() {
+    const uptimeSec = Math.floor((Date.now() - startTime) / 1000);
+    const cpuLoad = (Math.random() * 100).toFixed(1);
+    const networkSpeed = (Math.random() * 1000).toFixed(0);
+
+    statsPanel.innerHTML = `
+      Uptime: ${Math.floor(uptimeSec/60)}m ${uptimeSec%60}s<br>
+      CPU Load: ${cpuLoad}%<br>
+      Network Speed: ${networkSpeed} Mbps
+    `;
+  }
+  setInterval(updateStats, 1000);
+
+  // ASCII Art animation (frame by frame)
+  const asciiFrames = [
+    `
+  __   __  ___   _   _ 
+  \\ \\ / / |__ \\ | | | |
+   \\ V /     ) || |_| |
+    > <     / / |  _  |
+   / . \\   / /_ | | | |
+  /_/ \\_\\ |____||_| |_|`,
+    `
+  __   __  ___   _   _ 
+  \\ \\ / / |__ \\ | | | |
+   \\ V /    | | || |_| |
+    > <     | | |  _  |
+   / . \\   / /_ | | | |
+  /_/ \\_\\ |____||_| |_|`,
+    `
+  __   __  ___   _   _ 
+  \\ \\ / / |__ \\ | | | |
+   \\ V /    | | || |_| |
+    > <     | | |  _  |
+   / . \\   / /_ | | | |
+  /_/ \\_\\ |____||_| |_|`
+  ];
+  let asciiFrameIndex = 0;
+
+  function animateAscii() {
+    asciiArt.textContent = asciiFrames[asciiFrameIndex];
+    asciiFrameIndex = (asciiFrameIndex + 1) % asciiFrames.length;
+  }
+  setInterval(animateAscii, 700);
+
+  // Mouse interaction: hover or click triggers scanning animation + sound
+  document.body.addEventListener('mousemove', (e) => {
+    // Optional: show quick "scanning..." text briefly near cursor or flash effect
+    // For simplicity, play scan sound on mouse move but debounce it so it doesn't spam
+    if (!document.body.scanCooldown) {
+      scanSound.currentTime = 0;
+      scanSound.play().catch(() => {});
+      document.body.scanCooldown = true;
+      setTimeout(() => { document.body.scanCooldown = false; }, 1000);
+    }
+  });
+
+  document.body.addEventListener('click', (e) => {
+    scanSound.currentTime = 0;
+    scanSound.play().catch(() => {});
+  });
+
+  // Command input logic
+  const commands = {
+    help: "Available commands: help, scan, hack, connect, logout",
+    scan: "Scanning target... No vulnerabilities found.",
+    hack: "Launching hack sequence... Success! Data acquired.",
+    connect: "Connecting to remote server... Connection established.",
+    logout: "Logging out... See you next time."
+  };
+
+  inputLine.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const cmd = inputLine.value.trim().toLowerCase();
+      if (cmd.length === 0) return;
+      terminal.textContent += `> ${cmd}\n`;
+      if (commands[cmd]) {
+        terminal.textContent += commands[cmd] + '\n';
+      } else {
+        terminal.textContent += `Unknown command: ${cmd}\n`;
+      }
+      terminal.scrollTop = terminal.scrollHeight;
+      inputLine.value = '';
+    }
+  });
+
+  // Start matrix and typing effect on load
   window.onload = () => {
     drawMatrix();
     typeLine();
+    updateStats();
+    animateAscii();
   };
 </script>
 
