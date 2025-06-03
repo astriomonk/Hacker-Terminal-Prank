@@ -34,7 +34,7 @@
   }
   #terminal {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 40px;
     background: transparent;
     padding: 20px;
     box-sizing: border-box;
@@ -44,6 +44,7 @@
     white-space: pre-wrap;
     outline: none;
     z-index: 2;
+    user-select: text;
   }
   .glitch {
     animation: glitch 0.2s infinite alternate;
@@ -62,7 +63,7 @@
   }
   #easter-egg {
     position: fixed;
-    bottom: 10px;
+    bottom: 50px;
     right: 10px;
     width: 35px;
     height: 35px;
@@ -117,6 +118,87 @@
     user-select: none;
     border-radius: 6px;
   }
+  /* Flickering cursor */
+  #cursor {
+    display: inline-block;
+    width: 10px;
+    background-color: #00ff00;
+    animation: blink 1s step-start infinite;
+    margin-left: 2px;
+    vertical-align: bottom;
+  }
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+  /* Scrolling system log bar */
+  #syslog {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 40px;
+    background: rgba(0, 15, 0, 0.95);
+    border-top: 1px solid #00ff00;
+    color: #00ff00;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+    padding-left: 100%;
+    animation: syslog-scroll 30s linear infinite;
+    z-index: 3;
+    user-select: none;
+  }
+  @keyframes syslog-scroll {
+    from {
+      transform: translateX(0%);
+    }
+    to {
+      transform: translateX(-100%);
+    }
+  }
+  /* Error flash */
+  #error-flash {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    background: rgba(255, 0, 0, 0);
+    z-index: 5;
+    mix-blend-mode: screen;
+    transition: background 0.1s ease;
+  }
+  /* Terminal shake effect */
+  .shake {
+    animation: shake 0.4s ease-in-out;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-5px); }
+    40%, 80% { transform: translateX(5px); }
+  }
+  /* Input prompt styling */
+  #input-line {
+    display: flex;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    color: #00ff00;
+    margin-top: 10px;
+  }
+  #prompt {
+    user-select: none;
+    margin-right: 5px;
+  }
+  #input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #00ff00;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+  }
 </style>
 </head>
 <body>
@@ -125,6 +207,12 @@
 <div id="color-cycle"></div>
 
 <div id="terminal" tabindex="0" spellcheck="false"></div>
+
+<div id="input-line">
+  <div id="prompt">&gt;</div>
+  <input type="text" id="input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+  <div id="cursor"></div>
+</div>
 
 <div id="profile" title="Hacker Profile">
   <h2>Hacker Profile</h2>
@@ -144,9 +232,17 @@
 
 <div id="visitor-counter">Visitors this browser: 0</div>
 
+<div id="syslog" aria-live="off" aria-atomic="true" aria-relevant="additions">
+  [SYSTEM] Initializing protocols... [SYSTEM] Monitoring network traffic... [SYSTEM] Searching for vulnerabilities... [SYSTEM] Connection stable. [SYSTEM] Analyzing data packets... [SYSTEM] Firewall status: active.
+</div>
+
+<div id="error-flash"></div>
+
 <audio id="soundscape" loop>
   <source src="https://actions.google.com/sounds/v1/office/keyboard_typing_fast.ogg" type="audio/ogg" />
 </audio>
+<audio id="keypress-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
+<audio id="error-sound" src="https://actions.google.com/sounds/v1/alarms/warning_alarm.ogg"></audio>
 
 <script>
   // Binary background
@@ -184,7 +280,7 @@
   }
   draw();
 
-  // Typing Bot
+  // Typing Bot with slower typing
   const terminal = document.getElementById('terminal');
   const commands = [
     "Connecting to mainframe...",
@@ -209,8 +305,8 @@
   let typingIndex = 0;
   let charIndex = 0;
   let isDeleting = false;
-  let typingDelay = 140;  // slower typing speed
-  let pauseDelay = 1800;  // longer pause between lines
+  let typingDelay = 140;
+  let pauseDelay = 1800;
   let typingTimer;
   let terminalContent = '';
 
@@ -319,8 +415,98 @@
   localStorage.setItem('visitorCount', visits);
   visitorCounter.textContent = `Visitors this browser: ${visits}`;
 
-  // Focus terminal for scrolling
-  terminal.focus();
+  // Terminal shake effect occasionally
+  setInterval(() => {
+    if (Math.random() < 0.1) {
+      terminal.classList.add('shake');
+      setTimeout(() => terminal.classList.remove('shake'), 400);
+    }
+  }, 5000);
+
+  // Error flash and sound occasionally
+  const errorFlash = document.getElementById('error-flash');
+  const errorSound = document.getElementById('error-sound');
+  setInterval(() => {
+    if (Math.random() < 0.07) {
+      errorFlash.style.background = 'rgba(255, 0, 0, 0.25)';
+      errorSound.play().catch(() => {});
+      setTimeout(() => {
+        errorFlash.style.background = 'rgba(255, 0, 0, 0)';
+      }, 100);
+    }
+  }, 6000);
+
+  // Scrolling system log text loop (duplicated content for smooth loop)
+  const syslog = document.getElementById('syslog');
+  const logText = syslog.textContent;
+  syslog.textContent = logText + '   ' + logText;
+
+  // Input prompt commands
+  const input = document.getElementById('input');
+  const prompt = document.getElementById('prompt');
+  const keypressSound = document.getElementById('keypress-sound');
+
+  function addLine(text, isError = false) {
+    const line = document.createElement('div');
+    line.textContent = text;
+    if (isError) {
+      line.style.color = '#ff0000';
+      line.classList.add('glitch');
+      setTimeout(() => line.classList.remove('glitch'), 800);
+    }
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const val = input.value.trim();
+      if (!val) return;
+      addLine(`> ${val}`);
+      handleCommand(val.toLowerCase());
+      input.value = '';
+    } else {
+      // Play keypress sound lightly on input
+      if (!keypressSound.paused) {
+        keypressSound.currentTime = 0;
+      }
+      keypressSound.volume = 0.07;
+      keypressSound.play().catch(() => {});
+    }
+  });
+
+  function handleCommand(cmd) {
+    switch(cmd) {
+      case 'help':
+        addLine('Available commands: help, date, clear, echo, whoami');
+        break;
+      case 'date':
+        addLine(`Current date and time: ${new Date().toString()}`);
+        break;
+      case 'clear':
+        terminal.textContent = '';
+        break;
+      case 'whoami':
+        addLine('User: ZeroCool');
+        break;
+      default:
+        if (cmd.startsWith('echo ')) {
+          addLine(cmd.slice(5));
+        } else {
+          addLine(`Command not found: ${cmd}`, true);
+        }
+        break;
+    }
+  }
+
+  // Focus input on page load
+  input.focus();
+
+  // Clicking anywhere focuses input
+  document.body.addEventListener('click', () => {
+    input.focus();
+  });
+
 </script>
 
 </body>
