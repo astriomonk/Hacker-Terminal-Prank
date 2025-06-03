@@ -7,7 +7,6 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-  /* Base and full screen */
   html, body {
     margin: 0; padding: 0; height: 100%; overflow: hidden;
     background: black;
@@ -15,7 +14,6 @@
     color: #00ff00;
   }
 
-  /* Binary background canvas */
   #binary-canvas {
     position: fixed;
     top: 0; left: 0;
@@ -24,80 +22,64 @@
     background: black;
   }
 
-  /* Terminal container */
   #terminal {
     position: relative;
     z-index: 10;
     max-width: 900px;
     margin: 40px auto 20px auto;
-    background: rgba(0,0,0,0.85);
-    padding: 30px 30px 20px 30px;
+    background: rgba(0,0,0,0.9);
+    padding: 20px 30px 15px 30px;
     border: 1px solid #00ff00;
     box-shadow: 0 0 20px #00ff00;
     border-radius: 8px;
-    min-height: 450px;
+    height: 450px;
     display: flex;
     flex-direction: column;
     user-select: none;
   }
 
-  /* Terminal output area */
   #terminal-output {
-    flex: 1;
+    flex-grow: 1;
     overflow-y: auto;
     white-space: pre-wrap;
     font-size: 16px;
     line-height: 1.4;
+    margin-bottom: 10px;
     user-select: text;
-    margin-bottom: 8px;
   }
 
-  /* Input line container */
   #input-line {
-    display: flex;
-    font-family: 'Share Tech Mono', monospace;
+    color: #00ff00;
     font-size: 16px;
-    color: #00ff00;
-    border-top: 1px solid #00ff00;
-    padding-top: 10px;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
     user-select: none;
   }
-  #prompt {
+
+  #input-line::before {
+    content: "> ";
     user-select: none;
-    margin-right: 10px;
-    color: #00ff00;
   }
+
   #input {
-    flex: 1;
-    background: black;
+    flex-grow: 1;
+    background: transparent;
     border: none;
     outline: none;
     color: #00ff00;
     font-family: 'Share Tech Mono', monospace;
     font-size: 16px;
     caret-color: #00ff00;
-    padding: 6px 10px;
-    box-shadow: 0 0 10px #00ff00 inset;
-    border-radius: 6px;
-  }
-  #input::placeholder {
-    color: #007700cc;
+    padding-left: 0;
+    user-select: text;
   }
 
-  /* Blinking cursor */
-  #cursor {
-    width: 12px;
-    height: 22px;
-    background: #00ff00;
-    margin-left: 8px;
-    animation: blink 1.2s step-start 0s infinite;
-    border-radius: 3px;
-  }
-  @keyframes blink {
-    50% { background: transparent; }
+  /* Blinking caret inside input */
+  #input:focus {
+    outline: none;
   }
 
-  /* Visitors count */
   #visitors {
     margin: 15px auto 0 auto;
     max-width: 900px;
@@ -115,11 +97,8 @@
 
 <div id="terminal" tabindex="0" aria-label="Hacker Terminal">
   <div id="terminal-output"></div>
-
   <div id="input-line">
-    <div id="prompt">>></div>
-    <input id="input" type="text" autocomplete="off" spellcheck="false" placeholder="Type a command..."/>
-    <div id="cursor"></div>
+    <input id="input" type="text" autocomplete="off" spellcheck="false" placeholder="Type a command..." />
   </div>
 </div>
 
@@ -174,7 +153,6 @@
   // Terminal typing simulation
   const terminalOutput = document.getElementById('terminal-output');
   const input = document.getElementById('input');
-  const cursor = document.getElementById('cursor');
   const visitorsDisplay = document.getElementById('visitors');
 
   // Fake visitors count using localStorage
@@ -219,31 +197,29 @@
         terminalOutput.textContent += line[charIndex];
         charIndex++;
         setTimeout(typeChar, 80);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
       } else {
         terminalOutput.textContent += '\n';
         lineIndex++;
         setTimeout(typeLines, 500);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
       }
     }
     typeChar();
   }
   typeLines();
 
-  // Command prompt input functionality (echo commands)
+  // When enter is pressed in input, append input text to output and clear input
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       const command = input.value.trim();
       if (command.length > 0) {
-        terminalOutput.textContent += '>> ' + command + '\n';
+        terminalOutput.textContent += `> ${command}\n`;
         terminalOutput.scrollTop = terminalOutput.scrollHeight;
         input.value = '';
       }
+      e.preventDefault();
     }
-  });
-
-  // Scroll output when typing
-  input.addEventListener('input', () => {
-    terminalOutput.scrollTop = terminalOutput.scrollHeight;
   });
 
   // Focus input on terminal click
@@ -261,6 +237,9 @@
       }
     }
   });
+
+  // Focus input automatically
+  input.focus();
 </script>
 
 </body>
