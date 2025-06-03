@@ -2,412 +2,416 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Hacker Terminal Plus</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hacker Terminal</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
   html, body {
-    margin: 0; padding: 0;
-    height: 100%;
+    margin: 0; padding: 0; height: 100%;
     background: black;
     overflow: hidden;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Share Tech Mono', monospace;
     color: #00ff00;
+    user-select: none;
   }
-  canvas {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%;
+  #container {
+    display: flex;
     height: 100%;
-    z-index: 0;
+  }
+  #sidebar {
+    width: 250px;
+    background: #001100;
+    border-right: 2px solid #00ff00;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  #sidebar h2 {
+    margin-top: 0;
+    font-weight: normal;
+    text-align: center;
+    border-bottom: 1px solid #00ff00;
+    padding-bottom: 8px;
+  }
+  #profile {
+    margin-bottom: 20px;
+  }
+  #profile div {
+    margin: 6px 0;
+  }
+  #tabs {
+    display: flex;
+    border-bottom: 1px solid #00ff00;
+  }
+  .tab {
+    flex: 1;
+    padding: 6px 0;
+    text-align: center;
+    cursor: pointer;
+    border-right: 1px solid #00ff00;
+    user-select: none;
+    background: #002200;
+  }
+  .tab:last-child {
+    border-right: none;
+  }
+  .tab.active {
+    background: #003300;
+    font-weight: bold;
   }
   #terminal {
-    position: relative;
-    z-index: 1;
-    padding: 20px;
-    white-space: pre-wrap;
-    line-height: 1.5;
-    font-size: 16px;
-    height: 70vh;
-    overflow-y: auto;
+    flex: 1;
+    background: #000;
+    padding: 10px;
     box-sizing: border-box;
-    user-select: none;
-  }
-  #inputLine {
-    font-size: 16px;
-    color: #0f0;
-    outline: none;
-    border: none;
-    background: transparent;
-    width: 100%;
-    font-family: monospace;
-  }
-  #inputContainer {
+    color: #00ff00;
+    font-size: 14px;
+    line-height: 1.3em;
+    overflow-y: auto;
     position: relative;
-    z-index: 1;
-    padding: 0 20px 20px 20px;
-    background: black;
+    white-space: pre-wrap;
   }
-  .blinking-cursor {
-    display: inline-block;
-    width: 10px;
-    height: 1em;
-    background-color: #00ff00;
-    animation: blink 1s infinite;
-    vertical-align: bottom;
-    margin-left: 2px;
+  #binary-bg {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
   }
-  @keyframes blink {
-    0%, 50%, 100% {opacity: 1;}
-    25%, 75% {opacity: 0;}
+  .glitch {
+    animation: glitch 0.2s infinite alternate;
   }
-  #fullscreen-msg {
+  @keyframes glitch {
+    0% {
+      text-shadow:
+        2px 0 red,
+        -2px 0 cyan;
+    }
+    100% {
+      text-shadow:
+        -2px 0 red,
+        2px 0 cyan;
+    }
+  }
+  #easter-egg {
     position: fixed;
     bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,255,0,0.15);
-    color: #0f0;
-    padding: 5px 15px;
-    font-family: monospace;
-    font-size: 14px;
-    border-radius: 5px;
-    user-select: none;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    z-index: 10;
-  }
-  #fullscreen-msg.show {
-    opacity: 1;
-  }
-  #statsPanel {
-    position: fixed;
-    top: 10px;
     right: 10px;
-    background: rgba(0, 255, 0, 0.15);
-    padding: 10px 15px;
-    font-family: monospace;
-    font-size: 14px;
+    width: 35px;
+    height: 35px;
+    background: #00ff00;
+    opacity: 0.1;
+    cursor: pointer;
     border-radius: 5px;
-    color: #0f0;
+    user-select: none;
     z-index: 10;
-    user-select: none;
-    width: 160px;
+    transition: opacity 0.3s ease;
   }
-  #errorMessage {
+  #easter-egg:hover {
+    opacity: 0.5;
+  }
+  #color-cycle {
     position: fixed;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: black;
-    border: 3px solid #ff0000;
-    color: #ff0000;
-    font-family: monospace;
-    font-size: 48px;
-    padding: 20px 40px;
-    z-index: 15;
-    display: none;
-    user-select: none;
-    text-align: center;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+    animation: colorShift 20s linear infinite;
   }
-  #asciiArt {
-    position: relative;
-    white-space: pre;
-    font-family: monospace;
-    font-size: 12px;
-    color: #0f0;
-    margin-top: 20px;
-    user-select: none;
-    max-height: 200px;
-    overflow: hidden;
+  @keyframes colorShift {
+    0% { filter: hue-rotate(0deg);}
+    100% { filter: hue-rotate(360deg);}
+  }
+  /* Scrollbar for terminal */
+  #terminal::-webkit-scrollbar {
+    width: 8px;
+  }
+  #terminal::-webkit-scrollbar-thumb {
+    background: #00ff00;
+  }
+  #terminal::-webkit-scrollbar-track {
+    background: #001100;
   }
 </style>
 </head>
 <body>
 
-<canvas id="matrix"></canvas>
-<div id="terminal"></div>
-<div id="asciiArt"></div>
-<div id="inputContainer">
-  <input id="inputLine" autocomplete="off" spellcheck="false" placeholder="Type a command..." />
-  <span class="blinking-cursor"></span>
-</div>
-<div id="fullscreen-msg">🔍 Fullscreen mode activated. Press ESC to exit.</div>
-<div id="statsPanel"></div>
-<div id="errorMessage"></div>
+<canvas id="binary-bg"></canvas>
+<div id="color-cycle"></div>
 
-<audio id="typeSound" src="https://cdn.pixabay.com/download/audio/2022/03/26/audio_0f96ff1942.mp3?filename=typewriter-1-18510.mp3" preload="auto"></audio>
-<audio id="scanSound" src="https://cdn.pixabay.com/download/audio/2022/04/26/audio_111bdc6d6d.mp3?filename=scanner-5209.mp3" preload="auto"></audio>
+<div id="container">
+  <div id="sidebar">
+    <h2>Hacker Profile</h2>
+    <div id="profile">
+      <div><strong>Name:</strong> ZeroCool</div>
+      <div><strong>Reputation:</strong> 98.7%</div>
+      <div><strong>Access Level:</strong> Root</div>
+      <div><strong>Achievements:</strong></div>
+      <ul>
+        <li>Master Coder</li>
+        <li>Network Phantom</li>
+        <li>Bug Squasher</li>
+        <li>Crypto Ninja</li>
+      </ul>
+    </div>
+    <div id="tabs">
+      <div class="tab active" data-tab="terminal">Terminal</div>
+      <div class="tab" data-tab="logs">Logs</div>
+      <div class="tab" data-tab="netmap">Network Map</div>
+    </div>
+  </div>
+  <div id="terminal" tabindex="0" spellcheck="false"></div>
+</div>
+
+<div id="easter-egg" title="Secret Click"></div>
+
+<audio id="soundscape" loop>
+  <source src="https://actions.google.com/sounds/v1/office/keyboard_typing_fast.ogg" type="audio/ogg" />
+</audio>
 
 <script>
+  // Binary background
+  const canvas = document.getElementById('binary-bg');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let columns;
+  let drops = [];
+  const binaryChars = ['0', '1'];
+  function resize() {
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width;
+    canvas.height = height;
+    columns = Math.floor(width / 14);
+    drops = [];
+    for(let i = 0; i < columns; i++) {
+      drops[i] = Math.random() * height;
+    }
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = '#00ff00';
+    ctx.font = '14px monospace';
+    for(let i = 0; i < columns; i++) {
+      const text = binaryChars[Math.floor(Math.random() * binaryChars.length)];
+      ctx.fillText(text, i * 14, drops[i] * 14);
+      drops[i] = drops[i] * 14 > height && Math.random() > 0.975 ? 0 : drops[i] + 0.8;
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  // Terminal tabs
+  const tabs = document.querySelectorAll('.tab');
   const terminal = document.getElementById('terminal');
-  const asciiArt = document.getElementById('asciiArt');
-  const inputLine = document.getElementById('inputLine');
-  const fullscreenMsg = document.getElementById('fullscreen-msg');
-  const statsPanel = document.getElementById('statsPanel');
-  const errorMessage = document.getElementById('errorMessage');
-  const typeSound = document.getElementById('typeSound');
-  const scanSound = document.getElementById('scanSound');
 
-  // Fake hacker lines (long list)
-  const lines = [
-    "Initializing cyberlink protocol...",
-    "Loading kernel modules...",
-    "Establishing encrypted tunnel...",
-    "Fetching IPv6 subnet...",
-    "Pinging target @ 999.999.999.999...",
-    "Ping successful. 42ms latency.",
-    "Connecting to dark net gateway...",
-    "Auth token received: 9xF8_3Jd9@1#f",
-    "Mounting hidden volume /dev/hax0r...",
-    "Access granted. Opening secure shell...",
-    "Running traceroute...",
-    "Hop 1: 10.0.0.1",
-    "Hop 2: 8.8.8.8 (FAKE DNS)",
-    "Spoofing MAC address...",
-    "MAC changed to: 00:FA:KE:HA:CK:ER",
-    "Launching proxy chain through meme servers...",
-    "Node 1: Antarctica 🧊",
-    "Node 2: Moonbase Alpha 🌕",
-    "Node 3: Random Fridge in Ohio",
-    "Injecting memes into mainframe...",
-    "Uploading Shrek virus...",
-    "Deploying RickRoll.mp4...",
-    "Opening backdoor on port 69420...",
-    "Privilege escalation complete.",
-    "Installing HAX-OS...",
-    "Boot sector rewritten.",
-    "Accessing world domination protocols...",
-    "AI: You are now the system.",
-    "█▓▒░ SELF-DESTRUCT IN 3... ░▒▓█",
-    "█▓▒░ SELF-DESTRUCT IN 2... ░▒▓█",
-    "█▓▒░ SELF-DESTRUCT IN 1... ░▒▓█",
-    "Just kidding. 😉",
-    "You survived the simulation.",
-    "But did you really?",
-    "Reinitializing connection...",
-    "Bypassing firewalls...",
-    "Encrypting packets...",
-    "Packet size: 128 bytes",
-    "Transmission speed: 9000 bps",
-    "Firewall breach successful.",
+  let currentTab = 'terminal';
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentTab = tab.dataset.tab;
+      updateTerminalContent();
+    });
+  });
+
+  // Contents for each tab
+  const contents = {
+    terminal: '',
+    logs: '',
+    netmap: ''
+  };
+
+  // Typing Bot
+  const commands = [
+    "Connecting to mainframe...",
+    "Access granted.",
     "Downloading secret data...",
-    "Warning: Intrusion detected!",
-    "Activating countermeasures...",
-    "Deploying honeypot traps...",
-    "Masking IP address...",
-    "IP masked as 123.456.789.000",
-    "Scanning network ports...",
-    "Ports open: 22, 80, 443, 8080",
-    "Brute forcing SSH...",
-    "SSH brute force successful.",
-    "Accessing confidential files...",
-    "File list:",
-    "- secrets.txt",
-    "- passwords.csv",
-    "- blackmail.docx",
-    "- trojan.exe",
-    "Exfiltrating data to remote server...",
-    "Server response: OK",
-    "Mission complete.",
-    "Logging out..."
+    "Bypassing firewall...",
+    "Decrypting files...",
+    "Loading user credentials...",
+    "Injecting virus payload...",
+    "Compiling exploit modules...",
+    "Launching remote shell...",
+    "Establishing encrypted channel...",
+    "System scan complete.",
+    "Backdoor installed.",
+    "Packet sniffing in progress...",
+    "Firewall disabled.",
+    "Privilege escalation successful.",
+    "Wiping logs...",
+    "Disconnecting."
   ];
 
-  // Typing effect variables
-  let lineIndex = 0;
+  // Logs tab example data
+  const logsData = [
+    "[12:01] Connection from 192.168.1.101",
+    "[12:02] Unauthorized access attempt detected",
+    "[12:03] Firewall rules updated",
+    "[12:04] Malware signature updated",
+    "[12:05] Port scan detected from 10.0.0.5",
+    "[12:06] System integrity verified",
+    "[12:07] Suspicious login blocked",
+    "[12:08] Backup completed",
+    "[12:09] New user added: guest",
+    "[12:10] Antivirus scan started"
+  ];
+
+  // Network Map tab content
+  const netMapText = `
+    Network Nodes:
+    - Mainframe [ONLINE]
+    - Proxy Server [ONLINE]
+    - Database [OFFLINE]
+    - Firewall [ONLINE]
+    - VPN Gateway [ONLINE]
+    - Intrusion Detection [ONLINE]
+  `;
+
+  contents.logs = logsData.join('\n');
+  contents.netmap = netMapText;
+
+  // Glitch effect
+  let glitchInterval;
+  function startGlitch() {
+    glitchInterval = setInterval(() => {
+      if (currentTab !== 'terminal') return;
+      if (Math.random() < 0.15) {
+        terminal.classList.add('glitch');
+        setTimeout(() => {
+          terminal.classList.remove('glitch');
+        }, 200);
+      }
+    }, 3000);
+  }
+  startGlitch();
+
+  // Color cycling is done by CSS animation on #color-cycle
+
+  // Typing Bot Implementation
+  let typingIndex = 0;
   let charIndex = 0;
+  let isDeleting = false;
+  let typingDelay = 80;
+  let pauseDelay = 1200;
+  let typingTimer;
 
-  function typeLine() {
-    if (lineIndex < lines.length) {
-      const currentLine = lines[lineIndex];
-      if (charIndex < currentLine.length) {
-        terminal.textContent += currentLine[charIndex];
-        playSound();
-        charIndex++;
-        terminal.scrollTop = terminal.scrollHeight; // auto scroll
-        setTimeout(typeLine, 40);
-      } else {
-        terminal.textContent += '\n';
-        charIndex = 0;
-        lineIndex++;
-        setTimeout(typeLine, 300);
-      }
+  function typeCommand() {
+    if (currentTab !== 'terminal') {
+      clearTimeout(typingTimer);
+      return;
     }
-  }
-
-  function playSound() {
-    typeSound.currentTime = 0;
-    typeSound.play().catch(() => {});
-  }
-
-  // Matrix binary rain background
-  function drawMatrix() {
-    const canvas = document.getElementById("matrix");
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const letters = "01";
-    const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops = [];
-
-    for (let x = 0; x < columns; x++) drops[x] = Math.random() * canvas.height;
-
-    function draw() {
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      ctx.fillStyle = "#0F0";
-      ctx.font = fontSize + "px monospace";
-
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975)
-          drops[i] = 0;
-
-        drops[i]++;
-      }
-    }
-
-    setInterval(draw, 33);
-  }
-
-  // Fullscreen toggle on F key
-  document.addEventListener('keydown', (e) => {
-    if (e.key.toLowerCase() === 'f') {
-      const el = document.documentElement;
-      if (!document.fullscreenElement) {
-        if (el.requestFullscreen) el.requestFullscreen();
-        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-        else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
-        else if (el.msRequestFullscreen) el.msRequestFullscreen();
-
-        fullscreenMsg.classList.add('show');
-        setTimeout(() => fullscreenMsg.classList.remove('show'), 3000);
-      }
-    }
-  });
-
-  // Error messages flashing randomly
-  const errorMessages = [
-    "ERROR 404",
-    "ACCESS DENIED",
-    "INTRUSION DETECTED",
-    "FATAL SYSTEM ERROR",
-    "SEGMENTATION FAULT",
-  ];
-
-  function flashError() {
-    if (Math.random() < 0.1) { // 10% chance every 5 seconds
-      const msg = errorMessages[Math.floor(Math.random() * errorMessages.length)];
-      errorMessage.textContent = msg;
-      errorMessage.style.display = 'block';
-      setTimeout(() => {
-        errorMessage.style.display = 'none';
-      }, 2000);
-    }
-  }
-  setInterval(flashError, 5000);
-
-  // Fake system stats for top right panel
-  let startTime = Date.now();
-
-  function updateStats() {
-    const uptimeSec = Math.floor((Date.now() - startTime) / 1000);
-    const cpuLoad = (Math.random() * 100).toFixed(1);
-    const networkSpeed = (Math.random() * 1000).toFixed(0);
-
-    statsPanel.innerHTML = `
-      Uptime: ${Math.floor(uptimeSec/60)}m ${uptimeSec%60}s<br>
-      CPU Load: ${cpuLoad}%<br>
-      Network Speed: ${networkSpeed} Mbps
-    `;
-  }
-  setInterval(updateStats, 1000);
-
-  // ASCII Art animation (frame by frame)
-  const asciiFrames = [
-    `
-  __   __  ___   _   _ 
-  \\ \\ / / |__ \\ | | | |
-   \\ V /     ) || |_| |
-    > <     / / |  _  |
-   / . \\   / /_ | | | |
-  /_/ \\_\\ |____||_| |_|`,
-    `
-  __   __  ___   _   _ 
-  \\ \\ / / |__ \\ | | | |
-   \\ V /    | | || |_| |
-    > <     | | |  _  |
-   / . \\   / /_ | | | |
-  /_/ \\_\\ |____||_| |_|`,
-    `
-  __   __  ___   _   _ 
-  \\ \\ / / |__ \\ | | | |
-   \\ V /    | | || |_| |
-    > <     | | |  _  |
-   / . \\   / /_ | | | |
-  /_/ \\_\\ |____||_| |_|`
-  ];
-  let asciiFrameIndex = 0;
-
-  function animateAscii() {
-    asciiArt.textContent = asciiFrames[asciiFrameIndex];
-    asciiFrameIndex = (asciiFrameIndex + 1) % asciiFrames.length;
-  }
-  setInterval(animateAscii, 700);
-
-  // Mouse interaction: hover or click triggers scanning animation + sound
-  document.body.addEventListener('mousemove', (e) => {
-    // Optional: show quick "scanning..." text briefly near cursor or flash effect
-    // For simplicity, play scan sound on mouse move but debounce it so it doesn't spam
-    if (!document.body.scanCooldown) {
-      scanSound.currentTime = 0;
-      scanSound.play().catch(() => {});
-      document.body.scanCooldown = true;
-      setTimeout(() => { document.body.scanCooldown = false; }, 1000);
-    }
-  });
-
-  document.body.addEventListener('click', (e) => {
-    scanSound.currentTime = 0;
-    scanSound.play().catch(() => {});
-  });
-
-  // Command input logic
-  const commands = {
-    help: "Available commands: help, scan, hack, connect, logout",
-    scan: "Scanning target... No vulnerabilities found.",
-    hack: "Launching hack sequence... Success! Data acquired.",
-    connect: "Connecting to remote server... Connection established.",
-    logout: "Logging out... See you next time."
-  };
-
-  inputLine.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const cmd = inputLine.value.trim().toLowerCase();
-      if (cmd.length === 0) return;
-      terminal.textContent += `> ${cmd}\n`;
-      if (commands[cmd]) {
-        terminal.textContent += commands[cmd] + '\n';
-      } else {
-        terminal.textContent += `Unknown command: ${cmd}\n`;
-      }
+    const currentCommand = commands[typingIndex];
+    if (!isDeleting) {
+      contents.terminal = contents.terminal + currentCommand.charAt(charIndex);
+      charIndex++;
+      terminal.textContent = contents.terminal;
       terminal.scrollTop = terminal.scrollHeight;
-      inputLine.value = '';
+      if (charIndex === currentCommand.length) {
+        isDeleting = true;
+        typingTimer = setTimeout(typeCommand, pauseDelay);
+      } else {
+        typingTimer = setTimeout(typeCommand, typingDelay);
+      }
+    } else {
+      contents.terminal = contents.terminal.slice(0, -1);
+      terminal.textContent = contents.terminal;
+      terminal.scrollTop = terminal.scrollHeight;
+      if (contents.terminal.endsWith(currentCommand.slice(0, charIndex - 1))) {
+        charIndex--;
+        typingTimer = setTimeout(typeCommand, typingDelay / 2);
+      }
+      if (charIndex === 0) {
+        isDeleting = false;
+        typingIndex = (typingIndex + 1) % commands.length;
+        typingTimer = setTimeout(typeCommand, typingDelay);
+      }
+    }
+  }
+
+  typeCommand();
+
+  // Update terminal content for tabs other than terminal
+  function updateTerminalContent() {
+    if (currentTab === 'terminal') {
+      terminal.textContent = contents.terminal;
+    } else if (currentTab === 'logs') {
+      terminal.textContent = contents.logs;
+    } else if (currentTab === 'netmap') {
+      terminal.textContent = contents.netmap;
+    }
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  // Easter Egg - Clicking the secret box triggers a wild animation
+  const egg = document.getElementById('easter-egg');
+  let eggActive = false;
+
+  egg.addEventListener('click', () => {
+    if (eggActive) return;
+    eggActive = true;
+    egg.style.opacity = '1';
+    glitchInterval && clearInterval(glitchInterval);
+    terminal.textContent = '';
+    let count = 0;
+
+    const messages = [
+      "ACCESS GRANTED",
+      "YOU'VE FOUND THE SECRET!",
+      "RUNNING FULL SYSTEM OVERRIDE...",
+      "LOADING NUCLEAR LAUNCH SEQUENCE...",
+      "JUST KIDDING, HAVE A NICE DAY :)"
+    ];
+
+    function wildAnim() {
+      if(count >= messages.length) {
+        egg.style.opacity = '0.1';
+        eggActive = false;
+        startGlitch();
+        updateTerminalContent();
+        return;
+      }
+      terminal.textContent = messages[count];
+      terminal.classList.add('glitch');
+      terminal.scrollTop = terminal.scrollHeight;
+      count++;
+      setTimeout(() => {
+        terminal.classList.remove('glitch');
+        setTimeout(wildAnim, 1500);
+      }, 1200);
+    }
+
+    wildAnim();
+  });
+
+  // Keyboard controls
+  document.addEventListener('keydown', e => {
+    if (e.key.toLowerCase() === 'f') {
+      toggleFullscreen();
     }
   });
 
-  // Start matrix and typing effect on load
-  window.onload = () => {
-    drawMatrix();
-    typeLine();
-    updateStats();
-    animateAscii();
-  };
-</script>
+  // Fullscreen toggle
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
 
+  // Soundscape: play quiet keyboard typing sounds looping
+  const soundscape = document.getElementById('soundscape');
+  soundscape.volume = 0.1;
+  soundscape.play().catch(() => {
+    // Autoplay might block sound - no worries
+  });
+
+  // Focus terminal on load for keyboard scroll
+  terminal.focus();
+</script>
 </body>
 </html>
