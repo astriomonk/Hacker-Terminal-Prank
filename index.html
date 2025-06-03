@@ -6,389 +6,250 @@
 <title>Hacker Terminal</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+  /* Fullscreen styles and base */
   html, body {
-    margin: 0; padding: 0; height: 100%;
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
     background: black;
-    overflow: hidden;
     font-family: 'Share Tech Mono', monospace;
     color: #00ff00;
+  }
+
+  /* Binary background canvas */
+  #binary-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0;
+    background: black;
+  }
+
+  /* Terminal container */
+  #terminal {
+    position: relative;
+    z-index: 10;
+    max-width: 700px;
+    margin: 40px auto 20px auto;
+    background: rgba(0,0,0,0.85);
+    padding: 20px;
+    border: 1px solid #00ff00;
+    box-shadow: 0 0 15px #00ff00;
+    border-radius: 6px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
     user-select: none;
   }
-  #binary-bg {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 0;
-  }
-  #color-cycle {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 1;
-    mix-blend-mode: screen;
-    animation: colorShift 20s linear infinite;
-  }
-  @keyframes colorShift {
-    0% { filter: hue-rotate(0deg);}
-    100% { filter: hue-rotate(360deg);}
-  }
-  #terminal {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 40px;
-    background: transparent;
-    padding: 20px;
-    box-sizing: border-box;
-    font-size: 14px;
-    line-height: 1.3em;
+
+  /* Terminal output area */
+  #terminal-output {
+    flex: 1;
     overflow-y: auto;
     white-space: pre-wrap;
-    outline: none;
-    z-index: 2;
+    font-size: 14px;
+    line-height: 1.4;
     user-select: text;
   }
-  .glitch {
-    animation: glitch 0.2s infinite alternate;
-  }
-  @keyframes glitch {
-    0% {
-      text-shadow:
-        2px 0 red,
-        -2px 0 cyan;
-    }
-    100% {
-      text-shadow:
-        -2px 0 red,
-        2px 0 cyan;
-    }
-  }
-  #easter-egg {
-    position: fixed;
-    bottom: 50px;
-    right: 10px;
-    width: 35px;
-    height: 35px;
-    background: #00ff00;
-    opacity: 0.1;
-    cursor: pointer;
-    border-radius: 5px;
-    user-select: none;
-    z-index: 3;
-    transition: opacity 0.3s ease;
-  }
-  #easter-egg:hover {
-    opacity: 0.5;
-  }
-  #profile {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    width: 240px;
-    background: rgba(0, 30, 0, 0.85);
-    border: 1px solid #00ff00;
-    padding: 12px;
-    font-size: 13px;
-    line-height: 1.4em;
-    z-index: 3;
-    user-select: none;
-    font-weight: 500;
-    color: #00ff00;
-  }
-  #profile h2 {
-    margin: 0 0 10px 0;
-    font-weight: 600;
-    font-size: 16px;
-    border-bottom: 1px solid #00ff00;
-    padding-bottom: 6px;
-  }
-  #profile ul {
-    padding-left: 18px;
-    margin: 6px 0 0 0;
-  }
-  #visitor-counter {
-    position: fixed;
-    bottom: 10px;
-    left: 10px;
-    background: rgba(0, 30, 0, 0.85);
-    border: 1px solid #00ff00;
-    padding: 8px 14px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 13px;
-    color: #00ff00;
-    z-index: 4;
-    user-select: none;
-    border-radius: 6px;
-  }
-  /* Flickering cursor */
-  #cursor {
-    display: inline-block;
-    width: 10px;
-    background-color: #00ff00;
-    animation: blink 1s step-start infinite;
-    margin-left: 2px;
-    vertical-align: bottom;
-  }
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-  }
-  /* Scrolling system log bar */
-  #syslog {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 40px;
-    background: rgba(0, 15, 0, 0.95);
-    border-top: 1px solid #00ff00;
-    color: #00ff00;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
-    overflow: hidden;
-    white-space: nowrap;
-    box-sizing: border-box;
-    padding-left: 100%;
-    animation: syslog-scroll 30s linear infinite;
-    z-index: 3;
-    user-select: none;
-  }
-  @keyframes syslog-scroll {
-    from {
-      transform: translateX(0%);
-    }
-    to {
-      transform: translateX(-100%);
-    }
-  }
-  /* Error flash */
-  #error-flash {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none;
-    background: rgba(255, 0, 0, 0);
-    z-index: 5;
-    mix-blend-mode: screen;
-    transition: background 0.1s ease;
-  }
-  /* Terminal shake effect */
-  .shake {
-    animation: shake 0.4s ease-in-out;
-  }
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-5px); }
-    40%, 80% { transform: translateX(5px); }
-  }
-  /* Input prompt styling */
+
+  /* Input line container */
   #input-line {
     display: flex;
     font-family: 'Share Tech Mono', monospace;
     font-size: 14px;
     color: #00ff00;
-    margin-top: 10px;
+    margin-top: 12px;
+    border-top: 1px solid #00ff00;
+    padding-top: 6px;
   }
   #prompt {
     user-select: none;
-    margin-right: 5px;
+    margin-right: 6px;
+    color: #00ff00;
   }
   #input {
     flex: 1;
-    background: transparent;
+    background: black;
     border: none;
     outline: none;
     color: #00ff00;
     font-family: 'Share Tech Mono', monospace;
     font-size: 14px;
+    caret-color: #00ff00;
+    padding: 3px 6px;
+    box-shadow: 0 0 8px #00ff00 inset;
+    border-radius: 4px;
+  }
+  #input::placeholder {
+    color: #007700aa;
+  }
+
+  /* Blinking cursor */
+  #cursor {
+    width: 10px;
+    height: 18px;
+    background: #00ff00;
+    margin-left: 4px;
+    animation: blink 1.2s step-start 0s infinite;
+    border-radius: 2px;
+  }
+  @keyframes blink {
+    50% { background: transparent; }
+  }
+
+  /* Visitors count */
+  #visitors {
+    margin: 12px auto 0 auto;
+    max-width: 700px;
+    font-size: 13px;
+    text-align: center;
+    color: #00cc00;
+    user-select: none;
+    text-shadow: 0 0 5px #00cc00;
   }
 </style>
 </head>
 <body>
 
-<canvas id="binary-bg"></canvas>
-<div id="color-cycle"></div>
+<canvas id="binary-canvas"></canvas>
 
-<div id="terminal" tabindex="0" spellcheck="false"></div>
+<div id="terminal" tabindex="0" aria-label="Hacker Terminal">
+  <div id="terminal-output"></div>
 
-<div id="input-line">
-  <div id="prompt">&gt;</div>
-  <input type="text" id="input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-  <div id="cursor"></div>
+  <div id="input-line">
+    <div id="prompt">>></div>
+    <input id="input" type="text" autocomplete="off" spellcheck="false" placeholder="Type a command..."/>
+    <div id="cursor"></div>
+  </div>
 </div>
 
-<div id="profile" title="Hacker Profile">
-  <h2>Hacker Profile</h2>
-  <div><strong>Name:</strong> ZeroCool</div>
-  <div><strong>Reputation:</strong> 98.7%</div>
-  <div><strong>Access Level:</strong> Root</div>
-  <div><strong>Achievements:</strong></div>
-  <ul>
-    <li>Master Coder</li>
-    <li>Network Phantom</li>
-    <li>Bug Squasher</li>
-    <li>Crypto Ninja</li>
-  </ul>
-</div>
-
-<div id="easter-egg" title="Secret Click"></div>
-
-<div id="visitor-counter">Visitors this browser: 0</div>
-
-<div id="syslog" aria-live="off" aria-atomic="true" aria-relevant="additions">
-  [SYSTEM] Initializing protocols... [SYSTEM] Monitoring network traffic... [SYSTEM] Searching for vulnerabilities... [SYSTEM] Connection stable. [SYSTEM] Analyzing data packets... [SYSTEM] Firewall status: active.
-</div>
-
-<div id="error-flash"></div>
-
-<audio id="soundscape" loop>
-  <source src="https://actions.google.com/sounds/v1/office/keyboard_typing_fast.ogg" type="audio/ogg" />
-</audio>
-<audio id="keypress-sound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-<audio id="error-sound" src="https://actions.google.com/sounds/v1/alarms/warning_alarm.ogg"></audio>
+<div id="visitors">Visitors: 0</div>
 
 <script>
-  // Binary background
-  const canvas = document.getElementById('binary-bg');
+  // Binary code background animation
+  const canvas = document.getElementById('binary-canvas');
   const ctx = canvas.getContext('2d');
   let width, height;
   let columns;
-  let drops = [];
-  const binaryChars = ['0', '1'];
-  function resize() {
+  let drops;
+
+  function setupCanvas() {
     width = window.innerWidth;
     height = window.innerHeight;
     canvas.width = width;
     canvas.height = height;
     columns = Math.floor(width / 14);
     drops = [];
-    for(let i = 0; i < columns; i++) {
-      drops[i] = Math.random() * height;
+    for (let x = 0; x < columns; x++) {
+      drops[x] = Math.floor(Math.random() * height / 14);
     }
   }
-  window.addEventListener('resize', resize);
-  resize();
+  setupCanvas();
+
+  const binaryChars = ['0','1'];
 
   function draw() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
     ctx.fillRect(0, 0, width, height);
     ctx.fillStyle = '#00ff00';
-    ctx.font = '14px monospace';
+    ctx.font = '14px "Share Tech Mono"';
+
     for(let i = 0; i < columns; i++) {
       const text = binaryChars[Math.floor(Math.random() * binaryChars.length)];
       ctx.fillText(text, i * 14, drops[i] * 14);
-      drops[i] = drops[i] * 14 > height && Math.random() > 0.975 ? 0 : drops[i] + 0.8;
+
+      if (drops[i] * 14 > height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
     }
     requestAnimationFrame(draw);
   }
   draw();
 
-  // Typing Bot with slower typing
-  const terminal = document.getElementById('terminal');
-  const commands = [
-    "Connecting to mainframe...",
-    "Access granted.",
-    "Downloading secret data...",
-    "Bypassing firewall...",
-    "Decrypting files...",
-    "Loading user credentials...",
-    "Injecting virus payload...",
-    "Compiling exploit modules...",
-    "Launching remote shell...",
-    "Establishing encrypted channel...",
-    "System scan complete.",
-    "Backdoor installed.",
-    "Packet sniffing in progress...",
-    "Firewall disabled.",
-    "Privilege escalation successful.",
-    "Wiping logs...",
-    "Disconnecting."
+  // Terminal typing simulation
+  const terminalOutput = document.getElementById('terminal-output');
+  const input = document.getElementById('input');
+  const cursor = document.getElementById('cursor');
+  const visitorsDisplay = document.getElementById('visitors');
+
+  // Fake visitors count using localStorage
+  let visitorsCount = localStorage.getItem('visitorCount') || 0;
+  visitorsCount = parseInt(visitorsCount) + 1;
+  localStorage.setItem('visitorCount', visitorsCount);
+  visitorsDisplay.textContent = 'Visitors: ' + visitorsCount;
+
+  // Text to display on terminal
+  const lines = [
+    "Initializing HackSim v3.14...",
+    "Accessing secure server... Access granted.",
+    "Establishing encrypted connection...",
+    "Fetching user data... 42 records found.",
+    "Analyzing traffic logs for anomalies...",
+    "Bypassing firewall layers... Layer 1 complete.",
+    "Decrypting sensitive files...",
+    "Uploading payload...",
+    "Payload upload successful.",
+    "System override activated.",
+    "Scanning network nodes...",
+    "Alert! Intrusion detection system triggered!",
+    "Launching countermeasures...",
+    "Trace route initiated. Hiding IP...",
+    "User device masked. Location obscured.",
+    "Accessing deep web archives...",
+    "Extracting encrypted keys...",
+    "Brute forcing password hashes...",
+    "Operation complete. Data exfiltrated.",
+    "Disconnecting from host.",
+    "Session terminated."
   ];
 
-  let typingIndex = 0;
-  let charIndex = 0;
-  let isDeleting = false;
-  let typingDelay = 140;
-  let pauseDelay = 1800;
-  let typingTimer;
-  let terminalContent = '';
+  // Function to print lines with delay
+  let lineIndex = 0;
+  function typeLines() {
+    if (lineIndex >= lines.length) return;
+    let line = lines[lineIndex];
+    let charIndex = 0;
+    let currentLine = '';
 
-  function typeCommand() {
-    if (!terminal) return;
-    const currentCommand = commands[typingIndex];
-    if (!isDeleting) {
-      terminalContent += currentCommand.charAt(charIndex);
-      charIndex++;
-      terminal.textContent = terminalContent;
-      terminal.scrollTop = terminal.scrollHeight;
-      if (charIndex === currentCommand.length) {
-        isDeleting = true;
-        typingTimer = setTimeout(typeCommand, pauseDelay);
+    function typeChar() {
+      if (charIndex < line.length) {
+        currentLine += line[charIndex];
+        terminalOutput.textContent = terminalOutput.textContent + line[charIndex];
+        charIndex++;
+        setTimeout(typeChar, 80); // slower typing speed
       } else {
-        typingTimer = setTimeout(typeCommand, typingDelay);
-      }
-    } else {
-      terminalContent = terminalContent.slice(0, -1);
-      terminal.textContent = terminalContent;
-      terminal.scrollTop = terminal.scrollHeight;
-      if (terminalContent.endsWith(currentCommand.slice(0, charIndex - 1))) {
-        charIndex--;
-        typingTimer = setTimeout(typeCommand, typingDelay / 2);
-      }
-      if (charIndex === 0) {
-        isDeleting = false;
-        typingIndex = (typingIndex + 1) % commands.length;
-        typingTimer = setTimeout(typeCommand, typingDelay);
+        terminalOutput.textContent += '\n';
+        lineIndex++;
+        setTimeout(typeLines, 500); // pause between lines
       }
     }
+    typeChar();
   }
-  typeCommand();
+  typeLines();
 
-  // Glitch effect
-  function glitchEffect() {
-    if (Math.random() < 0.15) {
-      terminal.classList.add('glitch');
-      setTimeout(() => terminal.classList.remove('glitch'), 200);
-    }
-  }
-  setInterval(glitchEffect, 3000);
-
-  // Easter Egg
-  const egg = document.getElementById('easter-egg');
-  let eggActive = false;
-  egg.addEventListener('click', () => {
-    if (eggActive) return;
-    eggActive = true;
-    terminalContent = '';
-    terminal.textContent = '';
-    let count = 0;
-    const messages = [
-      "ACCESS GRANTED",
-      "YOU'VE FOUND THE SECRET!",
-      "RUNNING FULL SYSTEM OVERRIDE...",
-      "LOADING NUCLEAR LAUNCH SEQUENCE...",
-      "JUST KIDDING, HAVE A NICE DAY :)"
-    ];
-    function wildAnim() {
-      if (count >= messages.length) {
-        eggActive = false;
-        terminalContent = '';
-        typingIndex = 0;
-        charIndex = 0;
-        isDeleting = false;
-        typeCommand();
-        return;
+  // Input line functionality (just echo commands)
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const command = input.value.trim();
+      if (command.length > 0) {
+        terminalOutput.textContent += '>> ' + command + '\n';
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        input.value = '';
       }
-      terminal.textContent = messages[count];
-      terminal.classList.add('glitch');
-      terminal.scrollTop = terminal.scrollHeight;
-      count++;
-      setTimeout(() => {
-        terminal.classList.remove('glitch');
-        setTimeout(wildAnim, 1500);
-      }, 1200);
     }
-    wildAnim();
   });
 
-  // Fullscreen toggle on 'f'
+  // Scroll output to bottom on input
+  input.addEventListener('input', () => {
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+  });
+
+  // Focus input on click anywhere in terminal
+  document.getElementById('terminal').addEventListener('click', () => {
+    input.focus();
+  });
+
+  // Toggle fullscreen on 'F' key press
   document.addEventListener('keydown', e => {
     if (e.key.toLowerCase() === 'f') {
       if (!document.fullscreenElement) {
@@ -398,115 +259,6 @@
       }
     }
   });
-
-  // Soundscape loop
-  const soundscape = document.getElementById('soundscape');
-  soundscape.volume = 0.1;
-  soundscape.play().catch(() => {});
-
-  // Visitor counter (per browser)
-  const visitorCounter = document.getElementById('visitor-counter');
-  let visits = localStorage.getItem('visitorCount');
-  if (!visits) {
-    visits = 1;
-  } else {
-    visits = parseInt(visits) + 1;
-  }
-  localStorage.setItem('visitorCount', visits);
-  visitorCounter.textContent = `Visitors this browser: ${visits}`;
-
-  // Terminal shake effect occasionally
-  setInterval(() => {
-    if (Math.random() < 0.1) {
-      terminal.classList.add('shake');
-      setTimeout(() => terminal.classList.remove('shake'), 400);
-    }
-  }, 5000);
-
-  // Error flash and sound occasionally
-  const errorFlash = document.getElementById('error-flash');
-  const errorSound = document.getElementById('error-sound');
-  setInterval(() => {
-    if (Math.random() < 0.07) {
-      errorFlash.style.background = 'rgba(255, 0, 0, 0.25)';
-      errorSound.play().catch(() => {});
-      setTimeout(() => {
-        errorFlash.style.background = 'rgba(255, 0, 0, 0)';
-      }, 100);
-    }
-  }, 6000);
-
-  // Scrolling system log text loop (duplicated content for smooth loop)
-  const syslog = document.getElementById('syslog');
-  const logText = syslog.textContent;
-  syslog.textContent = logText + '   ' + logText;
-
-  // Input prompt commands
-  const input = document.getElementById('input');
-  const prompt = document.getElementById('prompt');
-  const keypressSound = document.getElementById('keypress-sound');
-
-  function addLine(text, isError = false) {
-    const line = document.createElement('div');
-    line.textContent = text;
-    if (isError) {
-      line.style.color = '#ff0000';
-      line.classList.add('glitch');
-      setTimeout(() => line.classList.remove('glitch'), 800);
-    }
-    terminal.appendChild(line);
-    terminal.scrollTop = terminal.scrollHeight;
-  }
-
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') {
-      const val = input.value.trim();
-      if (!val) return;
-      addLine(`> ${val}`);
-      handleCommand(val.toLowerCase());
-      input.value = '';
-    } else {
-      // Play keypress sound lightly on input
-      if (!keypressSound.paused) {
-        keypressSound.currentTime = 0;
-      }
-      keypressSound.volume = 0.07;
-      keypressSound.play().catch(() => {});
-    }
-  });
-
-  function handleCommand(cmd) {
-    switch(cmd) {
-      case 'help':
-        addLine('Available commands: help, date, clear, echo, whoami');
-        break;
-      case 'date':
-        addLine(`Current date and time: ${new Date().toString()}`);
-        break;
-      case 'clear':
-        terminal.textContent = '';
-        break;
-      case 'whoami':
-        addLine('User: ZeroCool');
-        break;
-      default:
-        if (cmd.startsWith('echo ')) {
-          addLine(cmd.slice(5));
-        } else {
-          addLine(`Command not found: ${cmd}`, true);
-        }
-        break;
-    }
-  }
-
-  // Focus input on page load
-  input.focus();
-
-  // Clicking anywhere focuses input
-  document.body.addEventListener('click', () => {
-    input.focus();
-  });
-
 </script>
 
 </body>
