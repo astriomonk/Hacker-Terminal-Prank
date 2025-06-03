@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hacker Terminal</title>
+<title>Hacker Terminal with Lock Screen</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
   html, body {
@@ -13,55 +13,6 @@
     font-family: 'Share Tech Mono', monospace;
     color: #00ff00;
     user-select: none;
-  }
-  #lock-screen {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: black;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 10;
-    color: #00ff00;
-  }
-  #lock-screen h1 {
-    font-size: 60px;
-    margin-bottom: 20px;
-    font-weight: 900;
-    letter-spacing: 5px;
-  }
-  #lock-screen .lock-icon {
-    font-size: 100px;
-    margin-bottom: 30px;
-    text-shadow:
-      0 0 5px #00ff00,
-      0 0 20px #00ff00,
-      0 0 30px #00ff00,
-      0 0 40px #00ff00,
-      0 0 50px #00ff00;
-  }
-  #lock-screen input {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 30px;
-    background: black;
-    border: 2px solid #00ff00;
-    color: #00ff00;
-    padding: 10px 15px;
-    width: 160px;
-    text-align: center;
-    letter-spacing: 8px;
-    outline: none;
-    caret-color: #00ff00;
-  }
-  #lock-screen input::placeholder {
-    color: #004400;
-  }
-  #lock-screen .error {
-    margin-top: 15px;
-    color: #ff2222;
-    font-weight: bold;
-    height: 24px;
   }
   #binary-bg {
     position: fixed;
@@ -83,7 +34,7 @@
   }
   #terminal {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 50px;
+    top: 0; left: 0; right: 0; bottom: 40px;
     background: transparent;
     padding: 20px;
     box-sizing: border-box;
@@ -94,26 +45,26 @@
     outline: none;
     z-index: 2;
   }
-  #command-line {
+  #command-line-container {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    height: 50px;
-    background: rgba(0, 0, 0, 0.9);
-    border-top: 2px solid #00ff00;
+    background: rgba(0, 0, 0, 0.8);
+    border-top: 1px solid #00ff00;
+    padding: 8px 20px;
     box-sizing: border-box;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 18px;
-    color: #00ff00;
-    padding: 10px 20px;
-    outline: none;
     z-index: 3;
   }
-  #command-line::placeholder {
-    color: #004400;
+  #command-line {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #00ff00;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
   }
   #command-line:disabled {
     color: #004400;
-    background: black;
   }
   .glitch {
     animation: glitch 0.2s infinite alternate;
@@ -132,7 +83,7 @@
   }
   #easter-egg {
     position: fixed;
-    bottom: 10px;
+    bottom: 50px;
     right: 10px;
     width: 35px;
     height: 35px;
@@ -141,7 +92,7 @@
     cursor: pointer;
     border-radius: 5px;
     user-select: none;
-    z-index: 4;
+    z-index: 3;
     transition: opacity 0.3s ease;
   }
   #easter-egg:hover {
@@ -157,7 +108,7 @@
     padding: 12px;
     font-size: 13px;
     line-height: 1.4em;
-    z-index: 4;
+    z-index: 3;
     user-select: none;
     font-weight: 500;
     color: #00ff00;
@@ -173,29 +124,78 @@
     padding-left: 18px;
     margin: 6px 0 0 0;
   }
+  #lock-screen {
+    position: fixed;
+    inset: 0;
+    background: black;
+    color: #00ff00;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Share Tech Mono', monospace;
+    user-select: none;
+    z-index: 10;
+  }
+  #lock-icon {
+    width: 120px;
+    height: 120px;
+    margin-bottom: 20px;
+  }
+  /* Lock icon using SVG style in CSS */
+  #lock-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: #00ff00;
+    stroke: #00ff00;
+    stroke-width: 2;
+  }
+  #passcode-input {
+    background: black;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    font-size: 24px;
+    padding: 10px 15px;
+    width: 200px;
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    caret-color: #00ff00;
+  }
+  #passcode-input:focus {
+    outline: none;
+    border-color: #0f0;
+    box-shadow: 0 0 8px #0f0;
+  }
+  #lock-message {
+    margin-top: 15px;
+    font-size: 16px;
+    height: 18px;
+  }
 </style>
 </head>
 <body>
 
-<!-- LOCK SCREEN -->
 <div id="lock-screen">
-  <div class="lock-icon" aria-label="Lock">&#128274;</div>
-  <h1>ENTER PASSCODE</h1>
-  <input type="password" id="passcode-input" maxlength="4" placeholder="1234" autocomplete="off" />
-  <div class="error" id="pass-error"></div>
+  <div id="lock-icon" aria-label="Digital Lock Icon" role="img">
+    <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect x="16" y="28" width="32" height="24" rx="4" ry="4" fill="none" stroke="#00ff00" stroke-width="3"/>
+      <rect x="26" y="12" width="12" height="16" rx="6" ry="6" fill="none" stroke="#00ff00" stroke-width="3"/>
+      <line x1="32" y1="28" x2="32" y2="44" stroke="#00ff00" stroke-width="3" />
+    </svg>
+  </div>
+  <input id="passcode-input" type="password" maxlength="4" placeholder="Enter Passcode" autocomplete="off" />
+  <div id="lock-message"></div>
 </div>
 
-<!-- BINARY BACKGROUND -->
 <canvas id="binary-bg"></canvas>
 <div id="color-cycle"></div>
 
-<!-- TERMINAL OUTPUT -->
 <div id="terminal" tabindex="0" spellcheck="false"></div>
 
-<!-- COMMAND PROMPT -->
-<input type="text" id="command-line" placeholder="Type command here..." disabled autocomplete="off" />
+<div id="command-line-container">
+  <input id="command-line" type="text" disabled placeholder="Enter command..." autocomplete="off" spellcheck="false" />
+</div>
 
-<!-- HACKER PROFILE -->
 <div id="profile" title="Hacker Profile">
   <h2>Hacker Profile</h2>
   <div><strong>Name:</strong> ZeroCool</div>
@@ -210,47 +210,14 @@
   </ul>
 </div>
 
-<!-- EASTER EGG BUTTON -->
 <div id="easter-egg" title="Secret Click"></div>
 
-<!-- SOUND -->
 <audio id="soundscape" loop>
   <source src="https://actions.google.com/sounds/v1/office/keyboard_typing_fast.ogg" type="audio/ogg" />
 </audio>
 
 <script>
-  // LOCK SCREEN LOGIC
-  const lockScreen = document.getElementById('lock-screen');
-  const passInput = document.getElementById('passcode-input');
-  const passError = document.getElementById('pass-error');
-  const terminal = document.getElementById('terminal');
-  const commandLine = document.getElementById('command-line');
-  const soundscape = document.getElementById('soundscape');
-
-  passInput.focus();
-
-  passInput.addEventListener('keydown', e => {
-    if(e.key === 'Enter') {
-      checkPasscode();
-    }
-  });
-
-  function checkPasscode() {
-    const code = passInput.value.trim();
-    if(code === '1234') {
-      lockScreen.style.display = 'none';
-      commandLine.disabled = false;
-      commandLine.focus();
-      startTerminal();
-      soundscape.volume = 0.1;
-      soundscape.play().catch(() => {});
-    } else {
-      passError.textContent = 'Incorrect passcode.';
-      passInput.value = '';
-    }
-  }
-
-  // BINARY BACKGROUND
+  // Binary background
   const canvas = document.getElementById('binary-bg');
   const ctx = canvas.getContext('2d');
   let width, height;
@@ -285,208 +252,208 @@
   }
   draw();
 
-  // COMMANDS
-  function appendTerminal(text = '') {
-    terminal.textContent += text + '\n';
-    terminal.scrollTop = terminal.scrollHeight;
-  }
+  // Terminal and Commands
+  const terminal = document.getElementById('terminal');
+  const commandLine = document.getElementById('command-line');
+  const lockScreen = document.getElementById('lock-screen');
+  const passcodeInput = document.getElementById('passcode-input');
+  const lockMessage = document.getElementById('lock-message');
+  const soundscape = document.getElementById('soundscape');
 
-  const commands = {
-    help: () => {
-      appendTerminal("Available commands:");
-      appendTerminal(Object.keys(commands).join(", "));
-    },
-    clear: () => {
-      terminal.textContent = '';
-    },
-    whoami: () => {
-      appendTerminal("root");
-    },
-    uptime: () => {
-      let uptimeSeconds = Math.floor(Math.random() * 100000);
-      let hours = Math.floor(uptimeSeconds / 3600);
-      let minutes = Math.floor((uptimeSeconds % 3600) / 60);
-      let seconds = uptimeSeconds % 60;
-      appendTerminal(`System uptime: ${hours}h ${minutes}m ${seconds}s`);
-    },
-    ping: (args) => {
-      if (args.length === 0) {
-        appendTerminal("Usage: ping <ip>");
-      } else {
-        appendTerminal(`Pinging ${args[0]} with 32 bytes of data:`);
-        let count = 0;
-        function pingReply() {
-          if (count < 4) {
-            appendTerminal(`Reply from ${args[0]}: bytes=32 time=${Math.floor(Math.random()*100)}ms TTL=64`);
-            count++;
-            setTimeout(pingReply, 500);
-          } else {
-            appendTerminal(`Ping statistics for ${args[0]}: Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),`);
-            appendTerminal("Approximate round trip times in milli-seconds:");
-            appendTerminal(`Minimum = 1ms, Maximum = 99ms, Average = ${Math.floor(Math.random()*50)}ms`);
-            commandLine.disabled = false;
-            commandLine.focus();
-          }
-        }
-        commandLine.disabled = true;
-        pingReply();
+  let terminalContent = '';
+  let typingIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  let typingDelay = 140;
+  let pauseDelay = 1800;
+  let typingTimer;
+  let locked = true;
+
+  const commandsList = {
+    help: {
+      desc: 'Show list of commands',
+      exec: () => {
+        return Object.keys(commandsList).map(cmd => cmd + ' - ' + commandsList[cmd].desc).join('\n');
       }
     },
-    login: (args) => {
-      if(args.length === 0){
-        appendTerminal("Usage: login <username>");
-      } else {
-        appendTerminal(`Logging in as ${args[0]}...`);
-        setTimeout(() => {
-          appendTerminal(`Welcome ${args[0]}!`);
-          commandLine.disabled = false;
-          commandLine.focus();
-        }, 1000);
-        commandLine.disabled = true;
+    hack: {
+      desc: 'Start hacking simulation',
+      exec: () => {
+        return simulateHacking();
       }
     },
-    logout: () => {
-      appendTerminal("Logging out...");
-      setTimeout(() => {
-        appendTerminal("Goodbye!");
-        commandLine.disabled = true;
-      }, 1000);
-    },
-    virus: () => {
-      appendTerminal("Virus injected into the system...");
-      let steps = [
-        "Encrypting files...",
-        "Deleting backups...",
-        "Overwriting boot sector...",
-        "Virus spread complete."
-      ];
-      let i = 0;
-      function step() {
-        if (i < steps.length) {
-          appendTerminal(steps[i]);
-          i++;
-          setTimeout(step, 1200);
-        } else {
-          commandLine.disabled = false;
-          commandLine.focus();
-        }
-      }
-      commandLine.disabled = true;
-      step();
-    },
-    firewall: (args) => {
-      if(args.length === 0) {
-        appendTerminal("Firewall status: ENABLED");
-      } else if(args[0].toLowerCase() === "disable") {
-        appendTerminal("Disabling firewall...");
-        setTimeout(() => {
-          appendTerminal("Firewall disabled!");
-          commandLine.disabled = false;
-          commandLine.focus();
-        }, 1500);
-        commandLine.disabled = true;
-      } else if(args[0].toLowerCase() === "enable") {
-        appendTerminal("Enabling firewall...");
-        setTimeout(() => {
-          appendTerminal("Firewall enabled!");
-          commandLine.disabled = false;
-          commandLine.focus();
-        }, 1500);
-        commandLine.disabled = true;
-      } else {
-        appendTerminal("Usage: firewall [enable|disable]");
+    clear: {
+      desc: 'Clear terminal screen',
+      exec: () => {
+        terminalContent = '';
+        terminal.textContent = '';
+        return '';
       }
     },
-    stealth: () => {
-      appendTerminal("Entering stealth mode...");
-      appendTerminal("System visibility: OFF");
-    },
-    reboot: () => {
-      appendTerminal("Rebooting system...");
-      let countdown = 5;
-      function rebootStep() {
-        if(countdown > 0) {
-          appendTerminal(`Reboot in ${countdown}...`);
-          countdown--;
-          setTimeout(rebootStep, 1000);
-        } else {
-          appendTerminal("System rebooted.");
-          commandLine.disabled = false;
-          commandLine.focus();
-        }
+    shutdown: {
+      desc: 'Start shutdown animation',
+      exec: () => {
+        return shutdownSequence();
       }
-      commandLine.disabled = true;
-      rebootStep();
     },
-    hack: () => {
-      appendTerminal("Initiating hack...");
-      let steps = [
-        "Scanning ports...",
-        "Bypassing firewall...",
-        "Injecting trojan...",
-        "Accessing mainframe...",
-        "Downloading confidential files...",
-        "Upload malware...",
-        "Covering tracks...",
-        "Hack complete."
-      ];
-      let i = 0;
-      function step() {
-        if(i < steps.length) {
-          appendTerminal(steps[i]);
-          i++;
-          setTimeout(step, 1200);
-        } else {
-          commandLine.disabled = false;
-          commandLine.focus();
-        }
+    profile: {
+      desc: 'Show hacker profile',
+      exec: () => {
+        return "Name: ZeroCool\nReputation: 98.7%\nAccess Level: Root\nAchievements:\n- Master Coder\n- Network Phantom\n- Bug Squasher\n- Crypto Ninja";
       }
-      commandLine.disabled = true;
-      step();
+    },
+    echo: {
+      desc: 'Echo text',
+      exec: (args) => args.join(' ')
+    },
+    date: {
+      desc: 'Show current date and time',
+      exec: () => new Date().toString()
+    },
+    joke: {
+      desc: 'Tell a hacker joke',
+      exec: () => "Why do programmers prefer dark mode? Because light attracts bugs!"
+    },
+    whoami: {
+      desc: 'Show fake user info',
+      exec: () => "User: ZeroCool\nRole: Hacker\nLocation: Cyberspace"
+    },
+    version: {
+      desc: 'Show terminal version',
+      exec: () => "Hacker Terminal v1.3"
+    },
+    clearcache: {
+      desc: 'Clear browser cache (simulated)',
+      exec: () => "Cache cleared."
     }
   };
 
-  // HANDLE USER INPUT
-  function handleCommand(input) {
-    const [cmd, ...args] = input.toLowerCase().trim().split(' ');
-    if(commands[cmd]) {
-      commands[cmd](args);
-    } else if(input.trim() === '') {
-      // do nothing on empty input
+  function simulateHacking() {
+    const lines = [
+      "Initializing hack sequence...",
+      "Bypassing firewall...",
+      "Accessing mainframe...",
+      "Decrypting files...",
+      "Extracting data...",
+      "Uploading virus...",
+      "Cleanup started...",
+      "Hack complete. System compromised."
+    ];
+    let index = 0;
+    terminalContent = '';
+    terminal.textContent = '';
+    function printLine() {
+      if(index >= lines.length) {
+        return;
+      }
+      terminalContent += lines[index] + '\n';
+      terminal.textContent = terminalContent;
+      terminal.scrollTop = terminal.scrollHeight;
+      index++;
+      setTimeout(printLine, 800);
+    }
+    printLine();
+    return '';
+  }
+
+  function shutdownSequence() {
+    const lines = [
+      "Shutting down system...",
+      "Closing connections...",
+      "Saving logs...",
+      "Terminating processes...",
+      "Powering off."
+    ];
+    let index = 0;
+    terminalContent = '';
+    terminal.textContent = '';
+    function printLine() {
+      if(index >= lines.length) {
+        return;
+      }
+      terminalContent += lines[index] + '\n';
+      terminal.textContent = terminalContent;
+      terminal.scrollTop = terminal.scrollHeight;
+      index++;
+      setTimeout(printLine, 1000);
+    }
+    printLine();
+    return '';
+  }
+
+  function processCommand(input) {
+    if(!input.trim()) return;
+    terminalContent += '> ' + input + '\n';
+    terminal.textContent = terminalContent;
+    terminal.scrollTop = terminal.scrollHeight;
+
+    const [cmd, ...args] = input.toLowerCase().split(' ');
+    if(commandsList[cmd]) {
+      const result = commandsList[cmd].exec(args);
+      if(result) {
+        setTimeout(() => {
+          terminalContent += result + '\n';
+          terminal.textContent = terminalContent;
+          terminal.scrollTop = terminal.scrollHeight;
+        }, 300);
+      }
     } else {
-      appendTerminal(`Command not found: ${cmd}`);
+      setTimeout(() => {
+        terminalContent += 'Command not found. Type "help" for list of commands.\n';
+        terminal.textContent = terminalContent;
+        terminal.scrollTop = terminal.scrollHeight;
+      }, 300);
     }
   }
 
-  // START TERMINAL
-  function startTerminal() {
-    appendTerminal("Connecting to mainframe...");
-    setTimeout(() => {
-      appendTerminal("Access granted.");
-      appendTerminal("Type 'help' for commands.");
-      commandLine.disabled = false;
-      commandLine.focus();
-    }, 1500);
-  }
+  commandLine.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      const input = commandLine.value;
+      commandLine.value = '';
+      processCommand(input);
+    }
+  });
 
-  // TYPE COMMANDS AUTOMATICALLY (Optional, disabled here)
-  // You can implement if you want.
+  // Lock Screen Handling
+  passcodeInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      if(passcodeInput.value === '1234') {
+        lockMessage.textContent = 'Access Granted.';
+        setTimeout(() => {
+          lockScreen.style.display = 'none';
+          locked = false;
+          commandLine.disabled = false;
+          commandLine.focus();
+          soundscape.volume = 0.7;  // louder sound
+          soundscape.play().catch(() => {});
+          terminalContent = '';
+          terminal.textContent = '';
+        }, 700);
+      } else {
+        lockMessage.textContent = 'Incorrect Passcode.';
+        passcodeInput.value = '';
+      }
+    }
+  });
 
-  // GLITCH EFFECT
+  // Glitch effect
   function glitchEffect() {
-    if (Math.random() < 0.15) {
+    if (Math.random() < 0.15 && !locked) {
       terminal.classList.add('glitch');
       setTimeout(() => terminal.classList.remove('glitch'), 200);
     }
   }
   setInterval(glitchEffect, 3000);
 
-  // EASTER EGG BUTTON
+  // Color cycling handled by CSS animation on #color-cycle
+
+  // Easter Egg
   const egg = document.getElementById('easter-egg');
   let eggActive = false;
   egg.addEventListener('click', () => {
-    if(eggActive) return;
+    if (eggActive || locked) return;
     eggActive = true;
+    terminalContent = '';
     terminal.textContent = '';
     let count = 0;
     const messages = [
@@ -497,11 +464,10 @@
       "JUST KIDDING, HAVE A NICE DAY :)"
     ];
     function wildAnim() {
-      if(count >= messages.length) {
+      if (count >= messages.length) {
         eggActive = false;
-        appendTerminal("");
-        commandLine.disabled = false;
-        commandLine.focus();
+        terminalContent = '';
+        terminal.textContent = '';
         return;
       }
       terminal.textContent = messages[count];
@@ -516,10 +482,10 @@
     wildAnim();
   });
 
-  // FULLSCREEN TOGGLE ON F KEY
+  // Fullscreen toggle on 'f'
   document.addEventListener('keydown', e => {
-    if(e.key.toLowerCase() === 'f') {
-      if(!document.fullscreenElement) {
+    if(e.key.toLowerCase() === 'f' && !locked) {
+      if (!document.fullscreenElement) {
         document.documentElement.requestFullscreen();
       } else {
         document.exitFullscreen();
@@ -527,14 +493,10 @@
     }
   });
 
-  // COMMAND LINE INPUT EVENT
-  commandLine.addEventListener('keydown', e => {
-    if(e.key === 'Enter' && !commandLine.disabled) {
-      const input = commandLine.value;
-      appendTerminal(`> ${input}`);
-      commandLine.value = '';
-      handleCommand(input);
-    }
+  // Focus terminal on load
+  window.addEventListener('load', () => {
+    if(!locked) commandLine.focus();
+    else passcodeInput.focus();
   });
 </script>
 
