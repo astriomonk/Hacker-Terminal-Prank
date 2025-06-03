@@ -14,6 +14,55 @@
     color: #00ff00;
     user-select: none;
   }
+  #lock-screen {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    color: #00ff00;
+  }
+  #lock-screen h1 {
+    font-size: 60px;
+    margin-bottom: 20px;
+    font-weight: 900;
+    letter-spacing: 5px;
+  }
+  #lock-screen .lock-icon {
+    font-size: 100px;
+    margin-bottom: 30px;
+    text-shadow:
+      0 0 5px #00ff00,
+      0 0 20px #00ff00,
+      0 0 30px #00ff00,
+      0 0 40px #00ff00,
+      0 0 50px #00ff00;
+  }
+  #lock-screen input {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 30px;
+    background: black;
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    padding: 10px 15px;
+    width: 160px;
+    text-align: center;
+    letter-spacing: 8px;
+    outline: none;
+    caret-color: #00ff00;
+  }
+  #lock-screen input::placeholder {
+    color: #004400;
+  }
+  #lock-screen .error {
+    margin-top: 15px;
+    color: #ff2222;
+    font-weight: bold;
+    height: 24px;
+  }
   #binary-bg {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -32,9 +81,9 @@
     0% { filter: hue-rotate(0deg);}
     100% { filter: hue-rotate(360deg);}
   }
-  #terminal-container {
+  #terminal {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 40px;
+    top: 0; left: 0; right: 0; bottom: 50px;
     background: transparent;
     padding: 20px;
     box-sizing: border-box;
@@ -44,12 +93,59 @@
     white-space: pre-wrap;
     outline: none;
     z-index: 2;
-    display: none; /* hidden behind lock screen initially */
   }
-  #terminal {
-    width: 100%;
-    height: 100%;
-    overflow-wrap: break-word;
+  #command-line {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 50px;
+    background: rgba(0, 0, 0, 0.9);
+    border-top: 2px solid #00ff00;
+    box-sizing: border-box;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 18px;
+    color: #00ff00;
+    padding: 10px 20px;
+    outline: none;
+    z-index: 3;
+  }
+  #command-line::placeholder {
+    color: #004400;
+  }
+  #command-line:disabled {
+    color: #004400;
+    background: black;
+  }
+  .glitch {
+    animation: glitch 0.2s infinite alternate;
+  }
+  @keyframes glitch {
+    0% {
+      text-shadow:
+        2px 0 red,
+        -2px 0 cyan;
+    }
+    100% {
+      text-shadow:
+        -2px 0 red,
+        2px 0 cyan;
+    }
+  }
+  #easter-egg {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    width: 35px;
+    height: 35px;
+    background: #00ff00;
+    opacity: 0.1;
+    cursor: pointer;
+    border-radius: 5px;
+    user-select: none;
+    z-index: 4;
+    transition: opacity 0.3s ease;
+  }
+  #easter-egg:hover {
+    opacity: 0.5;
   }
   #profile {
     position: fixed;
@@ -61,11 +157,10 @@
     padding: 12px;
     font-size: 13px;
     line-height: 1.4em;
-    z-index: 2;
+    z-index: 4;
     user-select: none;
     font-weight: 500;
     color: #00ff00;
-    display: none; /* hidden behind lock screen initially */
   }
   #profile h2 {
     margin: 0 0 10px 0;
@@ -78,181 +173,30 @@
     padding-left: 18px;
     margin: 6px 0 0 0;
   }
-
-  /* Lock screen styles */
-  #lock-screen {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: #000;
-    z-index: 5;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: #00ff00;
-    user-select: none;
-  }
-  #lock-screen h1 {
-    margin: 0 0 20px 0;
-    font-size: 36px;
-    letter-spacing: 4px;
-    text-align: center;
-  }
-  #passcode-input {
-    background: black;
-    border: 2px solid #00ff00;
-    color: #00ff00;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 28px;
-    width: 180px;
-    text-align: center;
-    padding: 10px;
-    border-radius: 8px;
-    outline: none;
-  }
-  #passcode-input::placeholder {
-    color: #005500;
-  }
-  #error-msg {
-    margin-top: 10px;
-    color: #ff3300;
-    height: 18px;
-    font-size: 14px;
-    font-weight: bold;
-    visibility: hidden;
-  }
-
-  /* Glowing digital lock shape */
-  .lock-icon {
-    width: 120px;
-    height: 160px;
-    position: relative;
-    margin-bottom: 40px;
-  }
-  .lock-body {
-    position: absolute;
-    bottom: 0;
-    width: 100px;
-    height: 100px;
-    background: #00ff00;
-    border-radius: 20px 20px 15px 15px;
-    box-shadow:
-      0 0 15px #00ff00,
-      0 0 30px #00ff00,
-      0 0 60px #00ff00,
-      inset 0 0 15px #008800;
-    left: 50%;
-    transform: translateX(-50%);
-  }
-  .lock-shackle {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 70px;
-    height: 80px;
-    border: 8px solid #00ff00;
-    border-bottom: none;
-    border-radius: 40px 40px 0 0;
-    box-shadow:
-      0 0 15px #00ff00,
-      0 0 30px #00ff00,
-      0 0 60px #00ff00,
-      inset 0 0 15px #008800;
-    transform: translateX(-50%);
-    background: transparent;
-  }
-  .lock-keyhole {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    width: 20px;
-    height: 40px;
-    background: black;
-    border-radius: 8px 8px 10px 10px;
-    box-shadow:
-      0 0 12px #00ff00 inset;
-    transform: translateX(-50%);
-  }
-  .lock-keyhole::before {
-    content: '';
-    position: absolute;
-    top: 6px;
-    left: 50%;
-    width: 8px;
-    height: 8px;
-    background: #00ff00;
-    border-radius: 50%;
-    transform: translateX(-50%);
-    box-shadow:
-      0 0 10px #00ff00;
-  }
-
-  /* Hide scrollbar on terminal */
-  #terminal-container::-webkit-scrollbar {
-    display: none;
-  }
-  #terminal-container {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  /* Command prompt input */
-  #command-line {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40px;
-    background: #000;
-    border-top: 2px solid #00ff00;
-    padding: 8px 12px;
-    box-sizing: border-box;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 16px;
-    color: #00ff00;
-    outline: none;
-    z-index: 10;
-    display: none; /* hidden initially until unlocked */
-  }
-  #command-line::placeholder {
-    color: #005500;
-  }
-
-  /* Terminal prompt styling */
-  .prompt {
-    color: #00ff00;
-    font-weight: bold;
-    user-select: none;
-  }
 </style>
 </head>
 <body>
 
-<canvas id="binary-bg" aria-hidden="true"></canvas>
-<div id="color-cycle" aria-hidden="true"></div>
-
-<!-- Lock Screen -->
-<div id="lock-screen" role="dialog" aria-modal="true" aria-labelledby="lock-title">
-  <div class="lock-icon" aria-hidden="true">
-    <div class="lock-shackle"></div>
-    <div class="lock-body"></div>
-    <div class="lock-keyhole"></div>
-  </div>
-  <h1 id="lock-title">ENTER PASSCODE</h1>
-  <input type="password" id="passcode-input" placeholder="****" maxlength="4" aria-label="Enter passcode" autocomplete="off" />
-  <div id="error-msg" role="alert">Incorrect passcode!</div>
+<!-- LOCK SCREEN -->
+<div id="lock-screen">
+  <div class="lock-icon" aria-label="Lock">&#128274;</div>
+  <h1>ENTER PASSCODE</h1>
+  <input type="password" id="passcode-input" maxlength="4" placeholder="1234" autocomplete="off" />
+  <div class="error" id="pass-error"></div>
 </div>
 
-<!-- Terminal -->
-<div id="terminal-container" tabindex="0" aria-live="polite" aria-atomic="false">
-  <pre id="terminal"></pre>
-</div>
+<!-- BINARY BACKGROUND -->
+<canvas id="binary-bg"></canvas>
+<div id="color-cycle"></div>
 
-<!-- Command Prompt -->
-<input type="text" id="command-line" aria-label="Command prompt" placeholder="Type a command and press Enter" autocomplete="off" spellcheck="false" />
+<!-- TERMINAL OUTPUT -->
+<div id="terminal" tabindex="0" spellcheck="false"></div>
 
-<!-- Hacker Profile -->
-<div id="profile" title="Hacker Profile" aria-label="Hacker Profile">
+<!-- COMMAND PROMPT -->
+<input type="text" id="command-line" placeholder="Type command here..." disabled autocomplete="off" />
+
+<!-- HACKER PROFILE -->
+<div id="profile" title="Hacker Profile">
   <h2>Hacker Profile</h2>
   <div><strong>Name:</strong> ZeroCool</div>
   <div><strong>Reputation:</strong> 98.7%</div>
@@ -266,8 +210,47 @@
   </ul>
 </div>
 
+<!-- EASTER EGG BUTTON -->
+<div id="easter-egg" title="Secret Click"></div>
+
+<!-- SOUND -->
+<audio id="soundscape" loop>
+  <source src="https://actions.google.com/sounds/v1/office/keyboard_typing_fast.ogg" type="audio/ogg" />
+</audio>
+
 <script>
-  // Binary background setup
+  // LOCK SCREEN LOGIC
+  const lockScreen = document.getElementById('lock-screen');
+  const passInput = document.getElementById('passcode-input');
+  const passError = document.getElementById('pass-error');
+  const terminal = document.getElementById('terminal');
+  const commandLine = document.getElementById('command-line');
+  const soundscape = document.getElementById('soundscape');
+
+  passInput.focus();
+
+  passInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter') {
+      checkPasscode();
+    }
+  });
+
+  function checkPasscode() {
+    const code = passInput.value.trim();
+    if(code === '1234') {
+      lockScreen.style.display = 'none';
+      commandLine.disabled = false;
+      commandLine.focus();
+      startTerminal();
+      soundscape.volume = 0.1;
+      soundscape.play().catch(() => {});
+    } else {
+      passError.textContent = 'Incorrect passcode.';
+      passInput.value = '';
+    }
+  }
+
+  // BINARY BACKGROUND
   const canvas = document.getElementById('binary-bg');
   const ctx = canvas.getContext('2d');
   let width, height;
@@ -302,83 +285,87 @@
   }
   draw();
 
-  // Terminal & Command Prompt Logic
-  const terminalContainer = document.getElementById('terminal-container');
-  const terminal = document.getElementById('terminal');
-  const commandLine = document.getElementById('command-line');
-  const lockScreen = document.getElementById('lock-screen');
-  const passcodeInput = document.getElementById('passcode-input');
-  const errorMsg = document.getElementById('error-msg');
-  const profile = document.getElementById('profile');
-
-  // Initial typing animation messages
-  const introMessages = [
-    "Connecting to mainframe...",
-    "Access granted.",
-    "Welcome ZeroCool.",
-    "Type 'help' to get started."
-  ];
-  let introIndex = 0;
-  let introCharIndex = 0;
-  let introTypingDelay = 50;
-
-  // Print text to terminal
-  function appendTerminal(text) {
+  // COMMANDS
+  function appendTerminal(text = '') {
     terminal.textContent += text + '\n';
-    terminalContainer.scrollTop = terminalContainer.scrollHeight;
+    terminal.scrollTop = terminal.scrollHeight;
   }
 
-  // Type intro messages one char at a time
-  function typeIntro() {
-    if (introIndex >= introMessages.length) {
-      // done typing intro, show command prompt and focus
-      commandLine.style.display = 'block';
-      commandLine.focus();
-      return;
-    }
-    const msg = introMessages[introIndex];
-    if (introCharIndex < msg.length) {
-      terminal.textContent += msg.charAt(introCharIndex);
-      introCharIndex++;
-      terminalContainer.scrollTop = terminalContainer.scrollHeight;
-      setTimeout(typeIntro, introTypingDelay);
-    } else {
-      terminal.textContent += '\n';
-      introIndex++;
-      introCharIndex = 0;
-      setTimeout(typeIntro, 500);
-    }
-  }
-
-  // Clear terminal and print prompt
-  function printPrompt() {
-    appendTerminal('\n> ');
-  }
-
-  // Command implementations
   const commands = {
     help: () => {
       appendTerminal("Available commands:");
-      appendTerminal("  help      - Show this help text");
-      appendTerminal("  hack      - Initiate hacking sequence");
-      appendTerminal("  shutdown  - Shutdown the system");
-      appendTerminal("  clear     - Clear the terminal screen");
+      appendTerminal(Object.keys(commands).join(", "));
     },
-    hack: () => {
-      appendTerminal("Initiating hack sequence...");
-      let hackSteps = [
-        "Bypassing firewall...",
-        "Extracting credentials...",
-        "Decrypting data...",
-        "Uploading virus payload...",
-        "Hack complete. System compromised."
+    clear: () => {
+      terminal.textContent = '';
+    },
+    whoami: () => {
+      appendTerminal("root");
+    },
+    uptime: () => {
+      let uptimeSeconds = Math.floor(Math.random() * 100000);
+      let hours = Math.floor(uptimeSeconds / 3600);
+      let minutes = Math.floor((uptimeSeconds % 3600) / 60);
+      let seconds = uptimeSeconds % 60;
+      appendTerminal(`System uptime: ${hours}h ${minutes}m ${seconds}s`);
+    },
+    ping: (args) => {
+      if (args.length === 0) {
+        appendTerminal("Usage: ping <ip>");
+      } else {
+        appendTerminal(`Pinging ${args[0]} with 32 bytes of data:`);
+        let count = 0;
+        function pingReply() {
+          if (count < 4) {
+            appendTerminal(`Reply from ${args[0]}: bytes=32 time=${Math.floor(Math.random()*100)}ms TTL=64`);
+            count++;
+            setTimeout(pingReply, 500);
+          } else {
+            appendTerminal(`Ping statistics for ${args[0]}: Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),`);
+            appendTerminal("Approximate round trip times in milli-seconds:");
+            appendTerminal(`Minimum = 1ms, Maximum = 99ms, Average = ${Math.floor(Math.random()*50)}ms`);
+            commandLine.disabled = false;
+            commandLine.focus();
+          }
+        }
+        commandLine.disabled = true;
+        pingReply();
+      }
+    },
+    login: (args) => {
+      if(args.length === 0){
+        appendTerminal("Usage: login <username>");
+      } else {
+        appendTerminal(`Logging in as ${args[0]}...`);
+        setTimeout(() => {
+          appendTerminal(`Welcome ${args[0]}!`);
+          commandLine.disabled = false;
+          commandLine.focus();
+        }, 1000);
+        commandLine.disabled = true;
+      }
+    },
+    logout: () => {
+      appendTerminal("Logging out...");
+      setTimeout(() => {
+        appendTerminal("Goodbye!");
+        commandLine.disabled = true;
+      }, 1000);
+    },
+    virus: () => {
+      appendTerminal("Virus injected into the system...");
+      let steps = [
+        "Encrypting files...",
+        "Deleting backups...",
+        "Overwriting boot sector...",
+        "Virus spread complete."
       ];
       let i = 0;
       function step() {
-        if (i < hackSteps.length) {
-          appendTerminal(hackSteps[i]);
+        if (i < steps.length) {
+          appendTerminal(steps[i]);
           i++;
-          setTimeout(step, 800);
+          setTimeout(step, 1200);
         } else {
           commandLine.disabled = false;
           commandLine.focus();
@@ -387,76 +374,168 @@
       commandLine.disabled = true;
       step();
     },
-    shutdown: () => {
-      appendTerminal("System shutting down...");
-      let shutdownSteps = [
-        "Closing all connections...",
-        "Saving logs...",
-        "Terminating processes...",
-        "Goodbye."
+    firewall: (args) => {
+      if(args.length === 0) {
+        appendTerminal("Firewall status: ENABLED");
+      } else if(args[0].toLowerCase() === "disable") {
+        appendTerminal("Disabling firewall...");
+        setTimeout(() => {
+          appendTerminal("Firewall disabled!");
+          commandLine.disabled = false;
+          commandLine.focus();
+        }, 1500);
+        commandLine.disabled = true;
+      } else if(args[0].toLowerCase() === "enable") {
+        appendTerminal("Enabling firewall...");
+        setTimeout(() => {
+          appendTerminal("Firewall enabled!");
+          commandLine.disabled = false;
+          commandLine.focus();
+        }, 1500);
+        commandLine.disabled = true;
+      } else {
+        appendTerminal("Usage: firewall [enable|disable]");
+      }
+    },
+    stealth: () => {
+      appendTerminal("Entering stealth mode...");
+      appendTerminal("System visibility: OFF");
+    },
+    reboot: () => {
+      appendTerminal("Rebooting system...");
+      let countdown = 5;
+      function rebootStep() {
+        if(countdown > 0) {
+          appendTerminal(`Reboot in ${countdown}...`);
+          countdown--;
+          setTimeout(rebootStep, 1000);
+        } else {
+          appendTerminal("System rebooted.");
+          commandLine.disabled = false;
+          commandLine.focus();
+        }
+      }
+      commandLine.disabled = true;
+      rebootStep();
+    },
+    hack: () => {
+      appendTerminal("Initiating hack...");
+      let steps = [
+        "Scanning ports...",
+        "Bypassing firewall...",
+        "Injecting trojan...",
+        "Accessing mainframe...",
+        "Downloading confidential files...",
+        "Upload malware...",
+        "Covering tracks...",
+        "Hack complete."
       ];
       let i = 0;
       function step() {
-        if (i < shutdownSteps.length) {
-          appendTerminal(shutdownSteps[i]);
+        if(i < steps.length) {
+          appendTerminal(steps[i]);
           i++;
-          setTimeout(step, 1000);
+          setTimeout(step, 1200);
         } else {
-          appendTerminal("\n--- SYSTEM OFFLINE ---");
-          commandLine.disabled = true;
-          // Optionally hide terminal or show something else here
+          commandLine.disabled = false;
+          commandLine.focus();
         }
       }
       commandLine.disabled = true;
       step();
-    },
-    clear: () => {
-      terminal.textContent = '';
     }
   };
 
-  // Handle command input
-  commandLine.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const input = commandLine.value.trim().toLowerCase();
-      if (!input) return;
-      appendTerminal("> " + input);
-      commandLine.value = '';
+  // HANDLE USER INPUT
+  function handleCommand(input) {
+    const [cmd, ...args] = input.toLowerCase().trim().split(' ');
+    if(commands[cmd]) {
+      commands[cmd](args);
+    } else if(input.trim() === '') {
+      // do nothing on empty input
+    } else {
+      appendTerminal(`Command not found: ${cmd}`);
+    }
+  }
 
-      if (commands[input]) {
-        commands[input]();
-      } else {
-        appendTerminal(`Command not found: ${input}`);
-      }
-      // Keep focus on input
+  // START TERMINAL
+  function startTerminal() {
+    appendTerminal("Connecting to mainframe...");
+    setTimeout(() => {
+      appendTerminal("Access granted.");
+      appendTerminal("Type 'help' for commands.");
+      commandLine.disabled = false;
       commandLine.focus();
+    }, 1500);
+  }
+
+  // TYPE COMMANDS AUTOMATICALLY (Optional, disabled here)
+  // You can implement if you want.
+
+  // GLITCH EFFECT
+  function glitchEffect() {
+    if (Math.random() < 0.15) {
+      terminal.classList.add('glitch');
+      setTimeout(() => terminal.classList.remove('glitch'), 200);
     }
+  }
+  setInterval(glitchEffect, 3000);
+
+  // EASTER EGG BUTTON
+  const egg = document.getElementById('easter-egg');
+  let eggActive = false;
+  egg.addEventListener('click', () => {
+    if(eggActive) return;
+    eggActive = true;
+    terminal.textContent = '';
+    let count = 0;
+    const messages = [
+      "ACCESS GRANTED",
+      "YOU'VE FOUND THE SECRET!",
+      "RUNNING FULL SYSTEM OVERRIDE...",
+      "LOADING NUCLEAR LAUNCH SEQUENCE...",
+      "JUST KIDDING, HAVE A NICE DAY :)"
+    ];
+    function wildAnim() {
+      if(count >= messages.length) {
+        eggActive = false;
+        appendTerminal("");
+        commandLine.disabled = false;
+        commandLine.focus();
+        return;
+      }
+      terminal.textContent = messages[count];
+      terminal.classList.add('glitch');
+      terminal.scrollTop = terminal.scrollHeight;
+      count++;
+      setTimeout(() => {
+        terminal.classList.remove('glitch');
+        setTimeout(wildAnim, 1500);
+      }, 1200);
+    }
+    wildAnim();
   });
 
-  // Unlock logic
-  passcodeInput.focus();
-
-  passcodeInput.addEventListener('keydown', e => {
-    if(e.key === 'Enter') {
-      if (passcodeInput.value === '1234') {
-        lockScreen.style.display = 'none';
-        terminalContainer.style.display = 'block';
-        profile.style.display = 'block';
-        commandLine.style.display = 'block';
-        passcodeInput.value = '';
-        errorMsg.style.visibility = 'hidden';
-        terminal.textContent = '';
-        introIndex = 0;
-        introCharIndex = 0;
-        typeIntro();
-        commandLine.focus();
+  // FULLSCREEN TOGGLE ON F KEY
+  document.addEventListener('keydown', e => {
+    if(e.key.toLowerCase() === 'f') {
+      if(!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
       } else {
-        errorMsg.style.visibility = 'visible';
-        passcodeInput.value = '';
+        document.exitFullscreen();
       }
     }
   });
 
+  // COMMAND LINE INPUT EVENT
+  commandLine.addEventListener('keydown', e => {
+    if(e.key === 'Enter' && !commandLine.disabled) {
+      const input = commandLine.value;
+      appendTerminal(`> ${input}`);
+      commandLine.value = '';
+      handleCommand(input);
+    }
+  });
 </script>
 
 </body>
