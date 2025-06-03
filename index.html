@@ -6,6 +6,7 @@
   <title>Hacker Terminal</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
     html, body {
       margin: 0; padding: 0; height: 100%;
       background: black;
@@ -14,17 +15,53 @@
       overflow: hidden;
       user-select: none;
     }
-    #bootup {
-      position: absolute;
+
+    #lock-screen {
+      position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       background: black;
-      color: #00ff00;
-      padding: 20px;
-      font-size: 14px;
-      white-space: pre-wrap;
-      z-index: 10;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
     }
+
+    .digital-lock {
+      width: 120px;
+      height: 160px;
+      border: 4px solid #00ff00;
+      border-radius: 20px;
+      position: relative;
+      box-shadow: 0 0 30px #00ff00;
+    }
+
+    .digital-lock::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      left: 28px;
+      width: 64px;
+      height: 40px;
+      border: 4px solid #00ff00;
+      border-bottom: none;
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 0 20px #00ff00;
+    }
+
+    #pass-input {
+      background: black;
+      border: 2px solid #00ff00;
+      color: #00ff00;
+      padding: 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+      width: 160px;
+      text-align: center;
+    }
+
     #binary-bg {
       position: fixed;
       top: 0; left: 0;
@@ -32,6 +69,7 @@
       pointer-events: none;
       z-index: 0;
     }
+
     #terminal {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -42,6 +80,7 @@
       font-size: 14px;
       white-space: pre-wrap;
     }
+
     #command-line {
       position: fixed;
       bottom: 0; left: 0; width: 100%;
@@ -52,9 +91,11 @@
       align-items: center;
       z-index: 5;
     }
+
     #command-line span {
       margin-right: 8px;
     }
+
     #command-input {
       flex-grow: 1;
       background: transparent;
@@ -64,24 +105,53 @@
       font-size: 14px;
       outline: none;
     }
+
+    #fadeout {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: black;
+      opacity: 0;
+      z-index: 999;
+      transition: opacity 3s ease;
+      pointer-events: none;
+    }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
 
+<div id="lock-screen">
+  <div class="digital-lock"></div>
+  <input id="pass-input" type="password" placeholder="Enter Code" maxlength="8" />
+</div>
+
 <canvas id="binary-bg"></canvas>
-
-<div id="bootup"></div>
-
-<div id="terminal">
-  <div id="terminal-output"></div>
-</div>
-
-<div id="command-line">
-  <span>&gt;</span>
-  <input id="command-input" type="text" disabled />
-</div>
+<div id="terminal"><div id="terminal-output"></div></div>
+<div id="command-line"><span>&gt;</span><input id="command-input" type="text" /></div>
+<div id="fadeout"></div>
 
 <script>
+  // Lock screen logic
+  const lockScreen = document.getElementById("lock-screen");
+  const passInput = document.getElementById("pass-input");
+
+  passInput.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      if (passInput.value === "1234") {
+        lockScreen.classList.add("hidden");
+        commandInput.focus();
+      } else {
+        passInput.value = "";
+        passInput.placeholder = "Wrong Code";
+      }
+    }
+  });
+
+  // Binary Matrix Rain
   const canvas = document.getElementById("binary-bg");
   const ctx = canvas.getContext("2d");
   let width, height, columns, drops = [];
@@ -96,7 +166,6 @@
   }
   window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
-
   function drawMatrix() {
     ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
     ctx.fillRect(0, 0, width, height);
@@ -111,34 +180,9 @@
   }
   drawMatrix();
 
-  const bootup = document.getElementById("bootup");
-  const bootLines = [
-    "BIOS Version 5.4.3",
-    "Initializing hardware...",
-    "CPU: Quantum Core x99",
-    "Memory Check: 16384MB OK",
-    "Loading OS...",
-    "Establishing network connection...",
-    "Login Successful",
-    "Starting terminal interface..."
-  ];
-  let bootIndex = 0;
-  function playBootup() {
-    if (bootIndex < bootLines.length) {
-      bootup.textContent += bootLines[bootIndex] + "\n";
-      bootIndex++;
-      setTimeout(playBootup, 700);
-    } else {
-      bootup.style.display = "none";
-      commandInput.disabled = false;
-      commandInput.focus();
-      printOutput("Type 'help' for a list of commands.");
-    }
-  }
-  playBootup();
-
   const terminalOutput = document.getElementById("terminal-output");
   const commandInput = document.getElementById("command-input");
+  const fadeout = document.getElementById("fadeout");
 
   function printOutput(text) {
     terminalOutput.innerHTML += text + "\n";
@@ -152,20 +196,12 @@
     clear() {
       terminalOutput.innerHTML = "";
     },
-    shutdown() {
-      printOutput("Shutting down... Bye.");
-    },
     reboot() {
-      terminalOutput.innerHTML = "";
-      bootup.textContent = "";
-      bootup.style.display = "block";
-      bootIndex = 0;
-      commandInput.disabled = true;
-      playBootup();
+      window.location.reload();
     },
     matrix() {
-      printOutput("Matrix speed increased.");
-      drops = drops.map(() => 0); // refresh matrix rain
+      printOutput("Refreshing matrix background...");
+      drops = drops.map(() => 0);
     },
     hack() {
       printOutput("Initiating hacking sequence...");
@@ -184,6 +220,30 @@
         i++;
         if (i >= sequence.length) clearInterval(interval);
       }, 1000);
+    },
+    shutdown() {
+      const lines = [
+        "Saving session...",
+        "Stopping services...",
+        "Unmounting filesystems...",
+        "Flushing caches...",
+        "Terminating processes...",
+        "Disabling network interface...",
+        "Writing shutdown logs...",
+        "Goodbye, operator."
+      ];
+      commandInput.disabled = true;
+      let i = 0;
+      const interval = setInterval(() => {
+        printOutput(lines[i]);
+        i++;
+        if (i >= lines.length) {
+          clearInterval(interval);
+          setTimeout(() => {
+            fadeout.style.opacity = 1;
+          }, 500);
+        }
+      }, 1000);
     }
   };
 
@@ -199,6 +259,8 @@
       commandInput.value = "";
     }
   });
+
+  commandInput.focus();
 </script>
 </body>
 </html>
