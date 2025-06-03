@@ -103,6 +103,20 @@
     padding-left: 18px;
     margin: 6px 0 0 0;
   }
+  #visitor-counter {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 30, 0, 0.85);
+    border: 1px solid #00ff00;
+    padding: 8px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: #00ff00;
+    z-index: 4;
+    user-select: none;
+    border-radius: 6px;
+  }
 </style>
 </head>
 <body>
@@ -127,6 +141,8 @@
 </div>
 
 <div id="easter-egg" title="Secret Click"></div>
+
+<div id="visitor-counter">Visitors this browser: 0</div>
 
 <audio id="soundscape" loop>
   <source src="https://actions.google.com/sounds/v1/office/keyboard_typing_fast.ogg" type="audio/ogg" />
@@ -193,7 +209,7 @@
   let typingIndex = 0;
   let charIndex = 0;
   let isDeleting = false;
-  let typingDelay = 140;  // slowed down typing speed
+  let typingDelay = 140;  // slower typing speed
   let pauseDelay = 1800;  // longer pause between lines
   let typingTimer;
   let terminalContent = '';
@@ -237,8 +253,6 @@
     }
   }
   setInterval(glitchEffect, 3000);
-
-  // Color cycling handled by CSS animation on #color-cycle
 
   // Easter Egg
   const egg = document.getElementById('easter-egg');
@@ -293,6 +307,17 @@
   const soundscape = document.getElementById('soundscape');
   soundscape.volume = 0.1;
   soundscape.play().catch(() => {});
+
+  // Visitor counter (per browser)
+  const visitorCounter = document.getElementById('visitor-counter');
+  let visits = localStorage.getItem('visitorCount');
+  if (!visits) {
+    visits = 1;
+  } else {
+    visits = parseInt(visits) + 1;
+  }
+  localStorage.setItem('visitorCount', visits);
+  visitorCounter.textContent = `Visitors this browser: ${visits}`;
 
   // Focus terminal for scrolling
   terminal.focus();
