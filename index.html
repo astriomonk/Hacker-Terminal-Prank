@@ -44,12 +44,32 @@
       0%, 50%, 100% {opacity: 1;}
       25%, 75% {opacity: 0;}
     }
+    #fullscreen-msg {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,255,0,0.15);
+      color: #0f0;
+      padding: 5px 15px;
+      font-family: monospace;
+      font-size: 14px;
+      border-radius: 5px;
+      user-select: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: 10;
+    }
+    #fullscreen-msg.show {
+      opacity: 1;
+    }
   </style>
 </head>
 <body>
 
   <canvas id="matrix"></canvas>
   <div id="terminal"></div><div class="blinking-cursor"></div>
+  <div id="fullscreen-msg">🔍 Fullscreen mode activated. Press ESC to exit.</div>
 
   <audio id="typeSound" src="https://cdn.pixabay.com/download/audio/2022/03/26/audio_0f96ff1942.mp3?filename=typewriter-1-18510.mp3" preload="auto"></audio>
 
@@ -57,6 +77,7 @@
   const terminal = document.getElementById('terminal');
   const cursor = document.querySelector('.blinking-cursor');
   const typeSound = document.getElementById('typeSound');
+  const fullscreenMsg = document.getElementById('fullscreen-msg');
 
   // Fake hacker lines (about 2+ minutes typing)
   const lines = [
@@ -125,7 +146,6 @@
 
   let lineIndex = 0;
   let charIndex = 0;
-  let typing = true;
 
   function typeLine() {
     if (lineIndex < lines.length) {
@@ -142,9 +162,6 @@
         lineIndex++;
         setTimeout(typeLine, 300);
       }
-    } else {
-      typing = false;
-      // Optional: restart typing or do something else
     }
   }
 
@@ -189,7 +206,7 @@
     setInterval(draw, 33);
   }
 
-  // Listen for 'f' key to go fullscreen
+  // Fullscreen toggle on F key
   document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() === 'f') {
       const el = document.documentElement;
@@ -198,12 +215,15 @@
         else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
         else if (el.mozRequestFullScreen) el.mozRequestFullScreen();
         else if (el.msRequestFullscreen) el.msRequestFullscreen();
-        alert("🔍 Fullscreen mode activated.");
+
+        // Show message
+        fullscreenMsg.classList.add('show');
+        setTimeout(() => fullscreenMsg.classList.remove('show'), 3000);
       }
     }
   });
 
-  // Start matrix background and typing on load
+  // Start matrix and typing on load
   window.onload = () => {
     drawMatrix();
     typeLine();
