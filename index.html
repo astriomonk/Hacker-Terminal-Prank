@@ -7,7 +7,7 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-  /* Fullscreen styles and base */
+  /* Base and full screen */
   html, body {
     margin: 0; padding: 0; height: 100%; overflow: hidden;
     background: black;
@@ -28,14 +28,14 @@
   #terminal {
     position: relative;
     z-index: 10;
-    max-width: 700px;
+    max-width: 900px;
     margin: 40px auto 20px auto;
     background: rgba(0,0,0,0.85);
-    padding: 20px;
+    padding: 30px 30px 20px 30px;
     border: 1px solid #00ff00;
-    box-shadow: 0 0 15px #00ff00;
-    border-radius: 6px;
-    min-height: 400px;
+    box-shadow: 0 0 20px #00ff00;
+    border-radius: 8px;
+    min-height: 450px;
     display: flex;
     flex-direction: column;
     user-select: none;
@@ -46,24 +46,25 @@
     flex: 1;
     overflow-y: auto;
     white-space: pre-wrap;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.4;
     user-select: text;
+    margin-bottom: 8px;
   }
 
   /* Input line container */
   #input-line {
     display: flex;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
+    font-size: 16px;
     color: #00ff00;
-    margin-top: 12px;
     border-top: 1px solid #00ff00;
-    padding-top: 6px;
+    padding-top: 10px;
+    user-select: none;
   }
   #prompt {
     user-select: none;
-    margin-right: 6px;
+    margin-right: 10px;
     color: #00ff00;
   }
   #input {
@@ -73,24 +74,24 @@
     outline: none;
     color: #00ff00;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 14px;
+    font-size: 16px;
     caret-color: #00ff00;
-    padding: 3px 6px;
-    box-shadow: 0 0 8px #00ff00 inset;
-    border-radius: 4px;
+    padding: 6px 10px;
+    box-shadow: 0 0 10px #00ff00 inset;
+    border-radius: 6px;
   }
   #input::placeholder {
-    color: #007700aa;
+    color: #007700cc;
   }
 
   /* Blinking cursor */
   #cursor {
-    width: 10px;
-    height: 18px;
+    width: 12px;
+    height: 22px;
     background: #00ff00;
-    margin-left: 4px;
+    margin-left: 8px;
     animation: blink 1.2s step-start 0s infinite;
-    border-radius: 2px;
+    border-radius: 3px;
   }
   @keyframes blink {
     50% { background: transparent; }
@@ -98,13 +99,13 @@
 
   /* Visitors count */
   #visitors {
-    margin: 12px auto 0 auto;
-    max-width: 700px;
-    font-size: 13px;
+    margin: 15px auto 0 auto;
+    max-width: 900px;
+    font-size: 14px;
     text-align: center;
     color: #00cc00;
     user-select: none;
-    text-shadow: 0 0 5px #00cc00;
+    text-shadow: 0 0 6px #00cc00;
   }
 </style>
 </head>
@@ -145,6 +146,10 @@
   }
   setupCanvas();
 
+  window.addEventListener('resize', () => {
+    setupCanvas();
+  });
+
   const binaryChars = ['0','1'];
 
   function draw() {
@@ -178,7 +183,7 @@
   localStorage.setItem('visitorCount', visitorsCount);
   visitorsDisplay.textContent = 'Visitors: ' + visitorsCount;
 
-  // Text to display on terminal
+  // Text lines to display slowly in terminal output
   const lines = [
     "Initializing HackSim v3.14...",
     "Accessing secure server... Access granted.",
@@ -203,31 +208,28 @@
     "Session terminated."
   ];
 
-  // Function to print lines with delay
   let lineIndex = 0;
   function typeLines() {
     if (lineIndex >= lines.length) return;
     let line = lines[lineIndex];
     let charIndex = 0;
-    let currentLine = '';
 
     function typeChar() {
       if (charIndex < line.length) {
-        currentLine += line[charIndex];
-        terminalOutput.textContent = terminalOutput.textContent + line[charIndex];
+        terminalOutput.textContent += line[charIndex];
         charIndex++;
-        setTimeout(typeChar, 80); // slower typing speed
+        setTimeout(typeChar, 80);
       } else {
         terminalOutput.textContent += '\n';
         lineIndex++;
-        setTimeout(typeLines, 500); // pause between lines
+        setTimeout(typeLines, 500);
       }
     }
     typeChar();
   }
   typeLines();
 
-  // Input line functionality (just echo commands)
+  // Command prompt input functionality (echo commands)
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       const command = input.value.trim();
@@ -239,17 +241,17 @@
     }
   });
 
-  // Scroll output to bottom on input
+  // Scroll output when typing
   input.addEventListener('input', () => {
     terminalOutput.scrollTop = terminalOutput.scrollHeight;
   });
 
-  // Focus input on click anywhere in terminal
+  // Focus input on terminal click
   document.getElementById('terminal').addEventListener('click', () => {
     input.focus();
   });
 
-  // Toggle fullscreen on 'F' key press
+  // Fullscreen toggle on 'F' key press
   document.addEventListener('keydown', e => {
     if (e.key.toLowerCase() === 'f') {
       if (!document.fullscreenElement) {
