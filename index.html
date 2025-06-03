@@ -49,16 +49,28 @@
     animation: glitch 0.2s infinite alternate;
   }
   @keyframes glitch {
-    0% {
-      text-shadow:
-        2px 0 red,
-        -2px 0 cyan;
-    }
-    100% {
-      text-shadow:
-        -2px 0 red,
-        2px 0 cyan;
-    }
+    0% { text-shadow: 2px 0 red, -2px 0 cyan; }
+    100% { text-shadow: -2px 0 red, 2px 0 cyan; }
+  }
+  .shake {
+    animation: shake 0.4s ease-in-out;
+  }
+  @keyframes shake {
+    0% { transform: translate(0px, 0px); }
+    20% { transform: translate(5px, -5px); }
+    40% { transform: translate(-5px, 5px); }
+    60% { transform: translate(5px, 5px); }
+    80% { transform: translate(-5px, -5px); }
+    100% { transform: translate(0px, 0px); }
+  }
+  #command-input {
+    background: transparent;
+    border: none;
+    color: #00ff00;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    width: 100%;
   }
   #easter-egg {
     position: fixed;
@@ -89,12 +101,9 @@
     line-height: 1.4em;
     z-index: 3;
     user-select: none;
-    font-weight: 500;
-    color: #00ff00;
   }
   #profile h2 {
     margin: 0 0 10px 0;
-    font-weight: 600;
     font-size: 16px;
     border-bottom: 1px solid #00ff00;
     padding-bottom: 6px;
@@ -103,6 +112,31 @@
     padding-left: 18px;
     margin: 6px 0 0 0;
   }
+  .popup {
+    position: fixed;
+    background: red;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    z-index: 999;
+    border: 2px solid black;
+    box-shadow: 0 0 10px white;
+    animation: shake 0.3s infinite;
+  }
+  .progress-bar {
+    width: 100%;
+    background: rgba(0,255,0,0.2);
+    border: 1px solid #0f0;
+    height: 15px;
+    margin-top: 6px;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #00ff00;
+    width: 0%;
+    transition: width 0.2s linear;
+  }
 </style>
 </head>
 <body>
@@ -110,13 +144,17 @@
 <canvas id="binary-bg"></canvas>
 <div id="color-cycle"></div>
 
-<div id="terminal" tabindex="0" spellcheck="false"></div>
+<div id="terminal" tabindex="0" spellcheck="false">
+  <div id="terminal-output"></div>
+  <input id="command-input" type="text" autofocus />
+</div>
 
-<div id="profile" title="Hacker Profile">
+<div id="profile">
   <h2>Hacker Profile</h2>
   <div><strong>Name:</strong> ZeroCool</div>
   <div><strong>Reputation:</strong> 98.7%</div>
   <div><strong>Access Level:</strong> Root</div>
+  <div><strong>Visitors:</strong> <span id="visitor-count">...</span></div>
   <div><strong>Achievements:</strong></div>
   <ul>
     <li>Master Coder</li>
@@ -126,19 +164,16 @@
   </ul>
 </div>
 
-<div id="easter-egg" title="Secret Click"></div>
+<div id="easter-egg"></div>
 
 <audio id="soundscape" loop>
   <source src="https://actions.google.com/sounds/v1/office/keyboard_typing_fast.ogg" type="audio/ogg" />
 </audio>
 
 <script>
-  // Binary background
   const canvas = document.getElementById('binary-bg');
   const ctx = canvas.getContext('2d');
-  let width, height;
-  let columns;
-  let drops = [];
+  let width, height, columns, drops = [];
   const binaryChars = ['0', '1'];
   function resize() {
     width = window.innerWidth;
@@ -146,156 +181,160 @@
     canvas.width = width;
     canvas.height = height;
     columns = Math.floor(width / 14);
-    drops = [];
-    for(let i = 0; i < columns; i++) {
-      drops[i] = Math.random() * height;
-    }
+    drops = Array(columns).fill(1);
   }
   window.addEventListener('resize', resize);
   resize();
-
   function draw() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
     ctx.fillRect(0, 0, width, height);
-    ctx.fillStyle = '#00ff00';
+    ctx.fillStyle = '#0f0';
     ctx.font = '14px monospace';
-    for(let i = 0; i < columns; i++) {
-      const text = binaryChars[Math.floor(Math.random() * binaryChars.length)];
-      ctx.fillText(text, i * 14, drops[i] * 14);
-      drops[i] = drops[i] * 14 > height && Math.random() > 0.975 ? 0 : drops[i] + 0.8;
-    }
+    drops.forEach((y, i) => {
+      const text = binaryChars[Math.floor(Math.random() * 2)];
+      ctx.fillText(text, i * 14, y * 14);
+      drops[i] = y * 14 > height && Math.random() > 0.975 ? 0 : y + 0.8;
+    });
     requestAnimationFrame(draw);
   }
   draw();
 
-  // Typing Bot
+  const terminalOutput = document.getElementById('terminal-output');
+  const commandInput = document.getElementById('command-input');
   const terminal = document.getElementById('terminal');
-  const commands = [
+  const commands = {
+    help: 'help - List commands\nabout - About this terminal\nclear - Clear output\nhack - Begin hacking sequence\npopup - Trigger alert popup',
+    about: 'Hacker Terminal v1.0\nSimulated by ChatGPT.',
+    clear: 'CLEAR'
+  };
+
+  function processCommand(input) {
+    const command = input.trim();
+    if (!command) return;
+    const commandElement = document.createElement('div');
+    commandElement.textContent = `> ${command}`;
+    terminalOutput.appendChild(commandElement);
+
+    if (command === 'clear') {
+      terminalOutput.innerHTML = '';
+    } else if (command === 'hack') {
+      startHacking();
+    } else if (command === 'popup') {
+      spawnPopup();
+    } else if (commands[command]) {
+      const outputElement = document.createElement('div');
+      outputElement.textContent = commands[command];
+      terminalOutput.appendChild(outputElement);
+    } else {
+      const errorElement = document.createElement('div');
+      errorElement.textContent = `'${command}' is not recognized. Type 'help'.`;
+      terminalOutput.appendChild(errorElement);
+    }
+
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+  }
+
+  commandInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      processCommand(commandInput.value);
+      commandInput.value = '';
+    }
+  });
+
+  const messages = [
     "Connecting to mainframe...",
     "Access granted.",
-    "Downloading secret data...",
-    "Bypassing firewall...",
-    "Decrypting files...",
-    "Loading user credentials...",
-    "Injecting virus payload...",
-    "Compiling exploit modules...",
-    "Launching remote shell...",
-    "Establishing encrypted channel...",
-    "System scan complete.",
-    "Backdoor installed.",
-    "Packet sniffing in progress...",
-    "Firewall disabled.",
-    "Privilege escalation successful.",
-    "Wiping logs...",
-    "Disconnecting."
+    "Decrypting secure files...",
+    "Launching countermeasures...",
+    "Installing rootkit...",
+    "Downloading intel...",
+    "Complete."
   ];
-
   let typingIndex = 0;
-  let charIndex = 0;
-  let isDeleting = false;
-  let typingDelay = 140;  // slowed down typing speed
-  let pauseDelay = 1800;  // longer pause between lines
-  let typingTimer;
-  let terminalContent = '';
-
-  function typeCommand() {
-    if (!terminal) return;
-    const currentCommand = commands[typingIndex];
-    if (!isDeleting) {
-      terminalContent += currentCommand.charAt(charIndex);
-      charIndex++;
-      terminal.textContent = terminalContent;
-      terminal.scrollTop = terminal.scrollHeight;
-      if (charIndex === currentCommand.length) {
-        isDeleting = true;
-        typingTimer = setTimeout(typeCommand, pauseDelay);
-      } else {
-        typingTimer = setTimeout(typeCommand, typingDelay);
-      }
-    } else {
-      terminalContent = terminalContent.slice(0, -1);
-      terminal.textContent = terminalContent;
-      terminal.scrollTop = terminal.scrollHeight;
-      if (terminalContent.endsWith(currentCommand.slice(0, charIndex - 1))) {
-        charIndex--;
-        typingTimer = setTimeout(typeCommand, typingDelay / 2);
-      }
-      if (charIndex === 0) {
-        isDeleting = false;
-        typingIndex = (typingIndex + 1) % commands.length;
-        typingTimer = setTimeout(typeCommand, typingDelay);
-      }
-    }
+  function typeSim() {
+    if (typingIndex >= messages.length) return;
+    const line = document.createElement('div');
+    line.textContent = messages[typingIndex++];
+    terminalOutput.appendChild(line);
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    setTimeout(typeSim, 1800);
   }
-  typeCommand();
+  setTimeout(typeSim, 1500);
 
-  // Glitch effect
   function glitchEffect() {
-    if (Math.random() < 0.15) {
-      terminal.classList.add('glitch');
-      setTimeout(() => terminal.classList.remove('glitch'), 200);
+    if (Math.random() < 0.2) {
+      terminalOutput.classList.add('glitch');
+      setTimeout(() => terminalOutput.classList.remove('glitch'), 250);
     }
   }
   setInterval(glitchEffect, 3000);
 
-  // Color cycling handled by CSS animation on #color-cycle
-
-  // Easter Egg
-  const egg = document.getElementById('easter-egg');
-  let eggActive = false;
-  egg.addEventListener('click', () => {
-    if (eggActive) return;
-    eggActive = true;
-    terminalContent = '';
-    terminal.textContent = '';
-    let count = 0;
-    const messages = [
-      "ACCESS GRANTED",
-      "YOU'VE FOUND THE SECRET!",
-      "RUNNING FULL SYSTEM OVERRIDE...",
-      "LOADING NUCLEAR LAUNCH SEQUENCE...",
-      "JUST KIDDING, HAVE A NICE DAY :)"
-    ];
-    function wildAnim() {
-      if (count >= messages.length) {
-        eggActive = false;
-        terminalContent = '';
-        typingIndex = 0;
-        charIndex = 0;
-        isDeleting = false;
-        typeCommand();
-        return;
-      }
-      terminal.textContent = messages[count];
-      terminal.classList.add('glitch');
-      terminal.scrollTop = terminal.scrollHeight;
-      count++;
-      setTimeout(() => {
-        terminal.classList.remove('glitch');
-        setTimeout(wildAnim, 1500);
-      }, 1200);
-    }
-    wildAnim();
-  });
-
-  // Fullscreen toggle on 'f'
   document.addEventListener('keydown', e => {
     if (e.key.toLowerCase() === 'f') {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen();
-      } else {
-        document.exitFullscreen();
-      }
+      if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+      else document.exitFullscreen();
     }
   });
 
-  // Soundscape loop
-  const soundscape = document.getElementById('soundscape');
-  soundscape.volume = 0.1;
-  soundscape.play().catch(() => {});
+  const sound = document.getElementById('soundscape');
+  sound.volume = 0.1;
+  sound.play().catch(() => {});
 
-  // Focus terminal for scrolling
-  terminal.focus();
+  document.getElementById('easter-egg').addEventListener('click', () => {
+    document.body.classList.add('shake');
+    setTimeout(() => document.body.classList.remove('shake'), 500);
+    ['ACCESS GRANTED','LOADING MODULE...','YOU FOUND THE EGG'].forEach((msg, i) => {
+      setTimeout(() => {
+        const line = document.createElement('div');
+        line.textContent = msg;
+        terminalOutput.appendChild(line);
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+      }, i * 1300);
+    });
+  });
+
+  const count = localStorage.getItem('visitorCount');
+  const newCount = count ? parseInt(count) + 1 : 1;
+  localStorage.setItem('visitorCount', newCount);
+  document.getElementById('visitor-count').textContent = newCount;
+
+  // Hacking Progress
+  function startHacking() {
+    const line = document.createElement('div');
+    line.textContent = "Executing hack...";
+    terminalOutput.appendChild(line);
+    const progress = document.createElement('div');
+    progress.className = "progress-bar";
+    const fill = document.createElement('div');
+    fill.className = "progress-fill";
+    progress.appendChild(fill);
+    terminalOutput.appendChild(progress);
+    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+    document.body.classList.add('shake');
+    let percent = 0;
+    const interval = setInterval(() => {
+      percent += 2;
+      fill.style.width = percent + '%';
+      if (percent >= 100) {
+        clearInterval(interval);
+        const done = document.createElement('div');
+        done.textContent = "Hack complete.";
+        terminalOutput.appendChild(done);
+        document.body.classList.remove('shake');
+      }
+    }, 100);
+  }
+
+  // Virus Popups
+  function spawnPopup() {
+    const popup = document.createElement('div');
+    popup.className = 'popup';
+    popup.style.top = Math.random() * (window.innerHeight - 100) + 'px';
+    popup.style.left = Math.random() * (window.innerWidth - 200) + 'px';
+    popup.innerHTML = 'VIRUS DETECTED!<br><button onclick="this.parentElement.remove()">Close</button>';
+    document.body.appendChild(popup);
+  }
 </script>
 
 </body>
